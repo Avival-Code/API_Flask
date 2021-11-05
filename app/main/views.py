@@ -1,5 +1,6 @@
 from flask import make_response, render_template, jsonify
 from flask_restful import Resource
+from ..extensions import guard, limiter
 
 class MainPage( Resource ):
     def get( self ):
