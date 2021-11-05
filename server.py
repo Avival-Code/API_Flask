@@ -13,6 +13,8 @@ app = create_app( os.environ.get( "CURRENT_CONFIG" ) or 'default' )
 api = Api( app )
 
 api.add_resource( MainPage, "/" )
+api.add_resource( Login, "/login" )
+api.add_resource( Usuarios, "/usuarios" )
 
 app.app_context().push()
 database.create_all()

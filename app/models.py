@@ -2,8 +2,11 @@ from . import database
 
 class Usuario( database.Model ):
     clave_usuario = database.Column( database.Integer, primary_key=True, autoincrement=True )
+    nombres = database.Column( database.String( 25 ), nullable=False )
+    apellidos = database.Column( database.String( 50 ), nullable=False )
     nombre_usuario = database.Column( database.String( 50 ), nullable=False, unique=True )
     constrasena = database.Column( database.Text, nullable=False )
+    correo_electronico = database.Column( database.String( 50 ), nullable=False )
 
     @property
     def identity( self ):
