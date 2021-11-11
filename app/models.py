@@ -30,3 +30,15 @@ class Usuario( database.Model ):
 
     def __repr__( self ):
         return f"Usuario( nombres = { self.nombres }, apellidos = { self.apellidos }, nombre_usuario = { self.nombre_usuario }, contrasena = { self.contrasena }, correo_electronico = { self.correo_electronico } )"
+
+class Publicacion( database.Model ):
+    clave_publicacion = database.Column( database.Integer, primary_key=True, autoincrement=True )
+    nombre_publicacion = database.Column( database.String( 50 ), nullable=False )
+    descripcion = database.Column( database.String( 200 ), nullable=False )
+    calificacion_general = database.Column( database.Float )
+    categoria = database.Column( database.Integer, nullable=False )
+    fecha_publicacion = database.Column( database.Date )
+
+    def __repr__( self ):
+        return f"Publicacion( clave_publicacion = { self.clave_publicacion }, nombre_publicacion = { self.nombre_publicacion }, descripcion = { self.descripcion }, calificacion_general = { self.calificacion_general }, categoria = { self.categoria }, fecha_publicacion = { self.fecha_publicacion },  )"
+
