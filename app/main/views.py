@@ -1,5 +1,5 @@
 from flask import make_response, render_template, jsonify
-from flask_restful import Resource, marshal, marshal_with, abort
+from flask_restful import Resource, marshal_with, abort
 from flask_praetorian import auth_required
 from .. import database
 from ..extensions import guard, limiter

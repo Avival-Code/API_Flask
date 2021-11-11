@@ -5,7 +5,7 @@ class Usuario( database.Model ):
     nombres = database.Column( database.String( 25 ), nullable=False )
     apellidos = database.Column( database.String( 50 ), nullable=False )
     nombre_usuario = database.Column( database.String( 50 ), nullable=False, unique=True )
-    constrasena = database.Column( database.Text, nullable=False )
+    contrasena = database.Column( database.Text, nullable=False )
     correo_electronico = database.Column( database.String( 50 ), nullable=False )
 
     @property
@@ -18,7 +18,7 @@ class Usuario( database.Model ):
 
     @property
     def password( self ):
-        return self.constrasena
+        return self.contrasena
 
     @classmethod
     def lookup( cls, username ):
@@ -29,4 +29,4 @@ class Usuario( database.Model ):
         return cls.query.filter_by( clave_usuario=id ).one_or_none()
 
     def __repr__( self ):
-        return f"Usuario( nombre_usuario = { self.nombre_usuario }, contrasena = { self.constrasena } )"
+        return f"Usuario( nombres = { self.nombres }, apellidos = { self.apellidos }, nombre_usuario = { self.nombre_usuario }, contrasena = { self.contrasena }, correo_electronico = { self.correo_electronico } )"
