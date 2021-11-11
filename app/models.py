@@ -42,3 +42,21 @@ class Publicacion( database.Model ):
     def __repr__( self ):
         return f"Publicacion( clave_publicacion = { self.clave_publicacion }, nombre_publicacion = { self.nombre_publicacion }, descripcion = { self.descripcion }, calificacion_general = { self.calificacion_general }, categoria = { self.categoria }, fecha_publicacion = { self.fecha_publicacion },  )"
 
+class ComentarioUsuario( database.Model ):
+    clave_comentario = database.Column( database.Integer, primary_key=True, autoincrement=True )
+    clave_publicacion = database.Column( database.Integer, nullable=False )
+    clave_usuario = database.Column( database.Integer, nullable=False )
+    comentario = database.Column( database.String( 200 ), nullable=False )
+
+    def __repr__( self ):
+        return f"ComentarioUsuario( clave_comentario = { self.clave_comentario }, clave_publicacion = { self.clave_publicacion }, clave_usuario = { self.clave_usuario }, comentario = { self.comentario } )"
+
+class CalificacionUsuario( database.Model ):
+    clave_calificacion = database.Column( database.Integer, primary_key=True, autoincrement=True )
+    clave_publicacion = database.Column( database.Integer )
+    clave_usuario = database.Column( database.Integer )
+    calificacion = database.Column( database.Float )
+
+    def __repr__( self ):
+        return f"CalificacionUsuario( clave_calificacion = { self.clave_calificacion }, clave_publicacion = { self.clave_publicacion }, clave_usuario = { self.clave_usuario }, calificacion = { self.calificacion } )"
+
