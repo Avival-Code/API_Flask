@@ -22,7 +22,7 @@ class Usuario( database.Model ):
 
     @classmethod
     def lookup( cls, username ):
-        return cls.query.filter_by( clave_usuario=username ).one_or_none()
+        return cls.query.filter_by( nombre_usuario=username ).one_or_none()
 
     @classmethod
     def identify( cls, id ):
