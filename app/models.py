@@ -59,14 +59,14 @@ class ComentarioUsuario( database.Model ):
     def __repr__( self ):
         return f"ComentarioUsuario( clave_comentario = { self.clave_comentario }, clave_publicacion = { self.clave_publicacion }, clave_usuario = { self.clave_usuario }, comentario = { self.comentario } )"
 
-class CalificacionUsuario( database.Model ):
+class CalificacionPublicacion( database.Model ):
     clave_calificacion = database.Column( database.Integer, primary_key=True, autoincrement=True )
     clave_publicacion = database.Column( database.Integer )
     clave_usuario = database.Column( database.Integer )
     calificacion = database.Column( database.Float )
 
     def __repr__( self ):
-        return f"CalificacionUsuario( clave_calificacion = { self.clave_calificacion }, clave_publicacion = { self.clave_publicacion }, clave_usuario = { self.clave_usuario }, calificacion = { self.calificacion } )"
+        return f"CalificacionPublicacion( clave_calificacion = { self.clave_calificacion }, clave_publicacion = { self.clave_publicacion }, clave_usuario = { self.clave_usuario }, calificacion = { self.calificacion } )"
 
 class PublicacionesFavoritas( database.Model ):
     clave_registro = database.Column( database.Integer, primary_key=True, autoincrement=True )
