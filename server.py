@@ -15,6 +15,8 @@ api = Api( app )
 api.add_resource( MainPage, "/" )
 api.add_resource( Login, "/login" )
 api.add_resource( Usuarios, "/usuarios" )
+api.add_resource( UploadImagen, "/SubirImagen")
+api.add_resource( RecuperarImagen, "/RecuperarImagen")
 
 app.app_context().push()
 database.create_all()

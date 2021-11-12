@@ -1,11 +1,17 @@
-from flask import make_response, render_template, jsonify
-from flask_restful import Resource, marshal_with, abort
+from flask import make_response, render_template, jsonify, send_from_directory
+from flask.helpers import send_from_directory
+from werkzeug.utils import secure_filename
+from flask_restful import Resource, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
 from flask_praetorian import auth_required
 from .. import database
 from ..extensions import guard, limiter
 from ..models import *
 from .parsers import *
 from .fields import *
+import os
+
+
+
 
 class MainPage( Resource ):
     def get( self ):
@@ -32,3 +38,50 @@ class Usuarios( Resource ):
         database.session.add( usuario )
         database.session.commit()
         return usuario, 201
+
+
+class UploadImagen( Resource ):
+
+    def post(self):
+        foto = request.files['file']
+        if not foto:
+            return "No se a seleccionado ningun archivo", 404
+        try:
+            foto.save(os.path.join("Imagenes", secure_filename(foto.filename)))
+            return "se guardo con exito", 201
+        except IOError:
+            return "No se puede guardar ahora mismo", 403
+
+
+
+class RecuperarImagen( Resource ):
+
+    def get(self):
+            nombreFoto = request.args['NombreFoto']
+            if not nombreFoto:
+                return "No se especifica que foto decea recuperar", 404
+            try:
+
+                return send_from_directory("Imagenes", nombreFoto, as_atachment=False) , 201
+            except IOError:
+                    return "no se puede recuperar la foto", 403
+            
+
+class DescargarImagen( Resource ):
+    
+    def get(self):
+            nombreFoto = request.args['NombreFoto']
+            if not nombreFoto:
+                return "No se especifica que foto decea recuperar", 404
+            try:
+
+                return send_from_directory("Imagenes", nombreFoto, as_atachment=True) , 201
+            except IOError:
+                    return "no se puede recuperar la foto", 403
+
+
+   
+        
+       
+
+
