@@ -1,14 +1,18 @@
+from copy import Error
 from flask import make_response, render_template, jsonify, send_from_directory
-from flask.helpers import send_from_directory
+from flask.helpers import send_file, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
 from flask_praetorian import auth_required
+from werkzeug.wrappers import Response
 from .. import database
 from ..extensions import guard, limiter
 from ..models import *
 from .parsers import *
 from .fields import *
 import os
+
+import app
 
 
 
@@ -55,29 +59,31 @@ class UploadImagen( Resource ):
 
 
 class RecuperarImagen( Resource ):
+   
 
-    def get(self):
-            nombreFoto = request.args['NombreFoto']
+    def post(self):
+            foto = request.get_json()
+            nombreFoto = foto['NombreFoto']
             if not nombreFoto:
-                return "No se especifica que foto decea recuperar", 404
+                return "No se especifica que foto decea recuperar", 403
             try:
-
-                return send_from_directory("Imagenes", nombreFoto, as_atachment=False) , 201
-            except IOError:
-                    return "no se puede recuperar la foto", 403
+                return send_file(os.path.join("Imagenes"),nombreFoto, as_attachment=False) , 201
+            except Error:
+                    return "no se puede recuperar la foto", 404
             
 
 class DescargarImagen( Resource ):
     
     def get(self):
-            nombreFoto = request.args['NombreFoto']
+            foto = request.get_json()
+            nombreFoto = foto['NombreFoto']
             if not nombreFoto:
-                return "No se especifica que foto decea recuperar", 404
+                return "No se especifica que foto decea recuperar", 403
             try:
-
-                return send_from_directory("Imagenes", nombreFoto, as_atachment=True) , 201
-            except IOError:
-                    return "no se puede recuperar la foto", 403
+                
+                return send_file(os.path.join("Imagenes"),nombreFoto, as_attachment=False) , 201
+            except Error :
+                    return "no se puede recuperar la foto", 404
 
 
    

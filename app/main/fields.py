@@ -8,3 +8,4 @@ usuario_fields = {
     'constrasena': fields.String,
     'correo_electronico': fields.String
 }
+
