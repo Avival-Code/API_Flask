@@ -1,5 +1,7 @@
 from copy import Error
+from datetime import datetime
 from flask import make_response, render_template, jsonify, send_from_directory
+from flask.globals import session
 from flask.helpers import send_file, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
@@ -86,8 +88,67 @@ class DescargarImagen( Resource ):
                     return "no se puede recuperar la foto", 404
 
 
-   
+
+    '''decorators = [ limiter.limit( "2 per day" ) ]
+    @marshal_with( usuario_fields )
+    def post( self ):
+        usuario_args = usuario_put_args.parse_args()
+        usuario_existe = Usuario.query.filter_by( nombre_usuario=usuario_args[ 'nombre_usuario' ] ).one_or_none()
+        if usuario_existe:
+            abort( 409, message="El nombre de usuario ya se esta utilizando." )
+
+        usuario = Usuario( nombres=usuario_args[ 'nombres' ], apellidos=usuario_args[ 'apellidos' ], correo_electronico=usuario_args[ 'correo_electronico' ], nombre_usuario=usuario_args[ 'nombre_usuario' ], contrasena=guard.hash_password( usuario_args[ 'contrasena' ] ) )
+        database.session.add( usuario )
+        database.session.commit()
+        return usuario, 201'''
+
+
+
+
+class SubirPublicacion (Resource):
+    def post(self):
+        try: 
+            publicacionaSubir = request.get_json()
+            publicacionNueva = Publicacion(nombre_publicacion = publicacionaSubir['nombre_publicacion'],descripcion=publicacionaSubir['descripcion'],calificacion_general = publicacionaSubir['calificacion_general'], categoria = publicacionaSubir['categoria'],fecha_publicacion= datetime.now() )
+            database.session.add(publicacionNueva)
+            database.session.commit()
+            return publicacionNueva, 201
+        except Error:
+            return 404
+
+
+class RecuperarPublicacionesID (Resource):
+    def get(self):
+        return 404
+
+class RecuperarPublicaciones(Resource):
+    def get(self):
+        return 404
+
+class AgregarComentarioPublicacion(Resource):
+    def post(self):
+        try:
+
+            comentarioSubir = request.get_json()
+            comentarioNuevo = ComentarioUsuario(clave_publicacion = comentarioSubir['clave_publicacion'],clave_usuario = comentarioSubir['clave_usuario'], comentario = comentarioSubir['comentario'])
+            database.session.add(comentarioNuevo)
+            database.session.commit()
+            return comentarioNuevo, 201
+        except Error:
+            return 404
         
+
+class AgregarPublicacionFaborita(Resource):
+    def post(self):
+        return 404
+
+class AgregarCalificacionPublicacion(Resource):
+    def post(self):
+        return 404
+
+class RecuperarComentariosPublicacion(Resource):
+     def post(self):
+        return 404           
        
 
 
