@@ -89,23 +89,7 @@ class DescargarImagen( Resource ):
 
 
 
-    '''decorators = [ limiter.limit( "2 per day" ) ]
-    @marshal_with( usuario_fields )
-    def post( self ):
-        usuario_args = usuario_put_args.parse_args()
-        usuario_existe = Usuario.query.filter_by( nombre_usuario=usuario_args[ 'nombre_usuario' ] ).one_or_none()
-        if usuario_existe:
-            abort( 409, message="El nombre de usuario ya se esta utilizando." )
-
-        usuario = Usuario( nombres=usuario_args[ 'nombres' ], apellidos=usuario_args[ 'apellidos' ], correo_electronico=usuario_args[ 'correo_electronico' ], nombre_usuario=usuario_args[ 'nombre_usuario' ], contrasena=guard.hash_password( usuario_args[ 'contrasena' ] ) )
-        database.session.add( usuario )
-        database.session.commit()
-        return usuario, 201'''
-
-
-
-
-class SubirPublicacion (Resource):
+class Publicaciones (Resource):
     def post(self):
         try: 
             publicacionaSubir = request.get_json()
@@ -116,16 +100,17 @@ class SubirPublicacion (Resource):
         except Error:
             return 404
 
+    
 
-class RecuperarPublicacionesID (Resource):
+'''class RecuperarPublicacionesID (Resource):
     def get(self):
         return 404
 
 class RecuperarPublicaciones(Resource):
     def get(self):
-        return 404
+        return 404'''
 
-class AgregarComentarioPublicacion(Resource):
+class Comentarios(Resource):
     def post(self):
         try:
 
