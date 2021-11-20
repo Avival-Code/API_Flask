@@ -63,6 +63,13 @@ class UsuarioEspecifico( Resource ):
         usuario.correo_electronico = args[ "correo_electronico" ]
         return usuario, 200
 
+    decorators = [ limiter.limit( "1 per day" ) ]
     @auth_required
     def delete( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        database.session.delete( usuario )
+        database.session.commit()
+        return {}, 200
