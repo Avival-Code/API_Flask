@@ -73,6 +73,7 @@ class UsuarioEspecifico( Resource ):
         usuario.nombre_usuario = args[ "nombre_usuario" ]
         usuario.contrasena = guard.hash_password( args[ "contrasena" ] )
         usuario.correo_electronico = args[ "correo_electronico" ]
+        database.session.commit()
         return usuario, 200
 
     decorators = [ limiter.limit( "1 per day" ) ]
