@@ -20,6 +20,11 @@ class Login( Resource ):
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
 
 class Usuarios( Resource ):
+    @marshal_with( usuario_fields )
+    def get( self ):
+        usuarios = Usuario.query.all()
+        return usuarios, 200
+
     decorators = [ limiter.limit( "2 per day" ) ]
     @marshal_with( usuario_fields )
     def post( self ):
