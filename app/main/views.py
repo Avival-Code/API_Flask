@@ -37,3 +37,13 @@ class Usuarios( Resource ):
         database.session.add( usuario )
         database.session.commit()
         return usuario, 201
+
+class UsuarioEspecifico( Resource ):
+    def get( self, clave_usuario ):
+        return 200
+
+    def put( self, clave_usuario ):
+        return 200
+
+    def delete( self, clave_usuario ):
+        return 200
