@@ -15,11 +15,7 @@ from ..models import *
 from .parsers import *
 from .fields import *
 import os
-
 import app
-
-
-
 
 class MainPage( Resource ):
     def get( self ):
@@ -34,6 +30,11 @@ class Login( Resource ):
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
 
 class Usuarios( Resource ):
+    @marshal_with( usuario_fields )
+    def get( self ):
+        usuarios = Usuario.query.all()
+        return usuarios, 200
+
     decorators = [ limiter.limit( "2 per day" ) ]
     @marshal_with( usuario_fields )
     def post( self ):
@@ -46,6 +47,57 @@ class Usuarios( Resource ):
         database.session.add( usuario )
         database.session.commit()
         return usuario, 201
+
+class UsuarioEspecifico( Resource ):
+    @marshal_with( usuario_fields )
+    def get( self, clave_usuario ):
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        return usuario, 200
+
+    decorators = [ limiter.limit( "10 per day" ) ]
+    @auth_required
+    @marshal_with( usuario_fields )
+    def put( self, clave_usuario ):
+        args = usuario_put_args.parse_args()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message = "No se encontró el usuario especificado." )
+
+        usuario.nombres = args[ "nombres" ]
+        usuario.apellidos = args[ "apellidos" ]
+        usuario.nombre_usuario = args[ "nombre_usuario" ]
+        usuario.contrasena = guard.hash_password( args[ "contrasena" ] )
+        usuario.correo_electronico = args[ "correo_electronico" ]
+        database.session.commit()
+        return usuario, 200
+
+    decorators = [ limiter.limit( "1 per day" ) ]
+    @auth_required
+    def delete( self, clave_usuario ):
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        database.session.delete( usuario )
+        database.session.commit()
+        return {}, 200
+
+class PublicacionesFavoritas( Resource ):
+    def get( self, clave_usuario ):
+        return 200
+
+    def post( self, clave_usuario ):
+        return 200
+
+class UsuariosFavoritos( Resource ):
+    def get( self, clave_usuario ):
+        return 200
+
+    def post( self, clave_usuario ):
+        return 200
 
 
 class UploadImagen( Resource ):
@@ -142,7 +194,7 @@ class Comentarios(Resource):
             return comentarioNuevo, 201
         except Error:
             return 404
-
+          
     def get (self):
         try:
             publicacion = request.get_json()
@@ -154,17 +206,7 @@ class Comentarios(Resource):
             return "No hay comentarios", 404 
         except Error:
             return "Exepcion Encontrada",404
-
-
-class AgregarPublicacionFaborita(Resource):
-    def post(self):
-        return 404
-
+          
 class AgregarCalificacionPublicacion(Resource):
     def post(self):
         return 404
-
-        
-       
-
-
