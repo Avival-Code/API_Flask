@@ -36,7 +36,7 @@ class Usuarios( Resource ):
     def get( self ):
         usuarios = Usuario.query.all()
         return usuarios, 200
-        
+
     decorators = [ limiter.limit( "2 per day" ) ]
     @marshal_with( usuario_fields )
     def post( self ):
@@ -49,6 +49,16 @@ class Usuarios( Resource ):
         database.session.add( usuario )
         database.session.commit()
         return usuario, 201
+
+class UsuarioEspecifico( Resource ):
+    def get( self, clave_usuario):
+        return 200
+
+    def put( self, clave_usuario ):
+        return 200
+
+    def delete( self, clave_usuario ):
+        return 200
 
 
 class UploadImagen( Resource ):
