@@ -1,5 +1,7 @@
 from copy import Error
 from datetime import datetime
+from logging import error
+import re
 from flask import make_response, render_template, jsonify, send_from_directory
 from flask.globals import session
 from flask.helpers import send_file, send_from_directory
@@ -152,15 +154,34 @@ class Publicaciones (Resource):
         except Error:
             return 404
 
+
+    def get (self):
+        try:
+            publicaciones = database.session.query(Publicacion)
+            return publicaciones, 201
+        except: Error
+        return 404
     
 
-'''class RecuperarPublicacionesID (Resource):
-    def get(self):
-        return 404
 
-class RecuperarPublicaciones(Resource):
     def get(self):
-        return 404'''
+        try:
+            publicacionBuscar =request.get_json()
+            idpublicacion = publicacionBuscar['clave_publicacion']
+            publicacionEncontrada = database.session.query(Publicacion).filter_by(clave_publicacion = idpublicacion)
+
+            if not publicacionEncontrada:
+                return publicacionEncontrada, 201
+                
+            return "No se encontro la publicacion", 404
+        except: Error
+
+        return "Excepcion encontrada", 404
+        
+
+    
+
+
 
 class Comentarios(Resource):
     def post(self):
@@ -173,14 +194,19 @@ class Comentarios(Resource):
             return comentarioNuevo, 201
         except Error:
             return 404
+          
+    def get (self):
+        try:
+            publicacion = request.get_json()
+            idpublicacion = publicacion['clave_publicacion']
+            comentarioPublicacion = database.session.query(ComentarioUsuario).filter_by(clave_publicacion= idpublicacion)
+            if not comentarioPublicacion:
+                return comentarioPublicacion, 201
 
+            return "No hay comentarios", 404 
+        except Error:
+            return "Exepcion Encontrada",404
+          
 class AgregarCalificacionPublicacion(Resource):
     def post(self):
         return 404
-
-class RecuperarComentariosPublicacion(Resource):
-     def post(self):
-        return 404           
-       
-
-
