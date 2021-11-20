@@ -13,11 +13,7 @@ from ..models import *
 from .parsers import *
 from .fields import *
 import os
-
 import app
-
-
-
 
 class MainPage( Resource ):
     def get( self ):
