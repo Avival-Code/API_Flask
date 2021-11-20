@@ -83,6 +83,20 @@ class UsuarioEspecifico( Resource ):
         database.session.commit()
         return {}, 200
 
+class PublicacionesFavoritas( Resource ):
+    def get( self, clave_usuario ):
+        return 200
+
+    def post( self, clave_usuario ):
+        return 200
+
+class UsuariosFavoritos( Resource ):
+    def get( self, clave_usuario ):
+        return 200
+
+    def post( self, clave_usuario ):
+        return 200
+
 
 class UploadImagen( Resource ):
 
@@ -159,11 +173,6 @@ class Comentarios(Resource):
             return comentarioNuevo, 201
         except Error:
             return 404
-        
-
-class AgregarPublicacionFaborita(Resource):
-    def post(self):
-        return 404
 
 class AgregarCalificacionPublicacion(Resource):
     def post(self):
