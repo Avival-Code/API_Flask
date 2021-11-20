@@ -59,8 +59,21 @@ class UsuarioEspecifico( Resource ):
 
         return usuario, 200
 
+    decorators = [ limiter.limit( "10 per day" ) ]
+    @auth_required
+    @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
-        return 200
+        args = usuario_put_args.parse_args()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message = "No se encontró el usuario especificado." )
+
+        usuario.nombres = args[ "nombres" ]
+        usuario.apellidos = args[ "apellidos" ]
+        usuario.nombre_usuario = args[ "nombre_usuario" ]
+        usuario.contrasena = guard.hash_password( args[ "contrasena" ] )
+        usuario.correo_electronico = args[ "correo_electronico" ]
+        return usuario, 200
 
     def delete( self, clave_usuario ):
         return 200
