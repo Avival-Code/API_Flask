@@ -39,11 +39,19 @@ class Usuarios( Resource ):
         return usuario, 201
 
 class UsuarioEspecifico( Resource ):
+    @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
 
+        return usuario, 200
+
+    @auth_required
+    @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
         return 200
 
+    @auth_required
     def delete( self, clave_usuario ):
         return 200
