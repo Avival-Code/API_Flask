@@ -98,6 +98,11 @@ class PublicacionesFavoritas( Resource ):
         return publicaciones_favoritas, 200
 
     def post( self, clave_usuario ):
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        
         return 200
 
 class UsuariosFavoritos( Resource ):
