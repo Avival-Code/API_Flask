@@ -6,7 +6,7 @@ from flask import make_response, render_template, jsonify, send_from_directory
 from flask.globals import session
 from flask.helpers import send_file, send_from_directory
 from werkzeug.utils import secure_filename
-from flask_restful import Resource, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
+from flask_restful import Resource, marshal, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
 from flask_praetorian import auth_required
 from werkzeug.wrappers import Response
 from .. import database
@@ -86,19 +86,97 @@ class UsuarioEspecifico( Resource ):
         return {}, 200
 
 class PublicacionesFavoritas( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
+    @marshal_with( publicacion_fields )
     def get( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+        
+        publicaciones_favoritas = database.session.query( Publicacion ).join( PublicacionesFavoritas, PublicacionesFavoritas.clave_publicacion==Publicacion.clave_publicacion ).filter( PublicacionesFavoritas.clave_usuario==clave_usuario ).all()
+        if not publicaciones_favoritas:
+            abort( 404, message="No hay publicaciones favoritas." )
+        return publicaciones_favoritas, 200
 
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
     def post( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        args = publicaciones_favoritas_put_args.parse_args()
+        favorito_existe = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
+        if favorito_existe:
+            abort( 409, message="La publicación ya esta en la lista de favoritos." )
+
+        publicacion_favorita = PublicacionesFavoritas( clave_usuario=clave_usuario, clave_publicacion=args[ 'clave_publicacion' ] )
+        database.session.add( publicacion_favorita )
+        database.session.commit()
+        return {}, 201
+
+    decorators = [ limiter.limit( "1 per minute" ) ]
+    @auth_required
+    def delete( self, clave_usuario ):
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        args = publicaciones_favoritas_put_args.parse_args()
+        publicacion_favorita = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
+        if not publicacion_favorita:
+            abort( 409, message="No se encontró la publicación favorita especificada." )
+
+        database.session.delete( publicacion_favorita )
+        database.session.commit()
+        return {}, 200
 
 class UsuariosFavoritos( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
+    @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
 
+        usuarios = database.session.query( Usuario ).join( UsuariosFavoritos, UsuariosFavoritos.clave_usuario_favorito==Usuario.clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario==clave_usuario ).all()
+        if not usuarios:
+            abort( 404, message="No hay usuarios favoritos." )
+        return usuarios, 200
+
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
     def post( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
 
+        args = usuarios_favoritos_put_args.parse_args()
+        favorito_existe = UsuariosFavoritos.query.filter_by( clave_usuario==clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario_favorito==args[ "clave_usuario_favorito" ] ).first()
+        if favorito_existe:
+            abort( 404, message="El usuario ya esta en la lista de favoritos." )
+
+        favorito = UsuariosFavoritos( clave_usuario=clave_usuario, clave_usuario_favorito=args[ "clave_usuario_favorito" ] )
+        database.session.add( favorito )
+        database.session.commit()
+        return {}, 201
+
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
+    def delete( self, clave_usuario ):
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        args = usuarios_favoritos_put_args.parse_args()
+        usuario_favorito = UsuariosFavoritos.query.filter_by( clave_usuario==clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario_favorito==args[ "clave_usuario_favorito" ] ).first()
+        if not usuario_favorito:
+            abort( 404, message="No se encontró el usuario favorito especificado." )
+
+        database.session.delete( usuario_favorito )
+        database.session.commit()
 
 class UploadImagen( Resource ):
 

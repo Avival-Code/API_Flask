@@ -9,3 +9,11 @@ usuario_fields = {
     'correo_electronico': fields.String
 }
 
+publicacion_fields = {
+    'clave_publicacion': fields.Integer,
+    'nombre_publicacion': fields.String,
+    'descripcion': fields.String,
+    'calificacion_general': fields.Float,
+    'categoria': fields.Integer,
+    'fecha_publicacion': fields.DateTime
+}
