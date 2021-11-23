@@ -104,7 +104,7 @@ class PublicacionesFavoritas( Resource ):
 
         args = publicaciones_favoritas_put_args.parse_args()
         favorito_existe = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
-        if not favorito_existe:
+        if favorito_existe:
             abort( 409, message="El favorito ya esta agregado a la lista." )
 
         publicacion_favorita = PublicacionesFavoritas( clave_usuario=clave_usuario, clave_publicacion=args[ 'clave_publicacion' ] )
