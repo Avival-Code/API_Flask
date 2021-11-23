@@ -112,6 +112,22 @@ class PublicacionesFavoritas( Resource ):
         database.session.commit()
         return {}, 201
 
+    decorators = [ limiter.limit( "1 per minute" ) ]
+    @auth_required
+    def delete( self, clave_usuario ):
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        args = publicaciones_favoritas_put_args.parse_args()
+        favorito = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
+        if not favorito:
+            abort( 409, message="No se encontró el favorito especificado." )
+
+        database.session.delete( favorito )
+        database.session.commit()
+        return {}, 200
+
 class UsuariosFavoritos( Resource ):
     def get( self, clave_usuario ):
         return 200
