@@ -6,7 +6,7 @@ from flask import make_response, render_template, jsonify, send_from_directory
 from flask.globals import session
 from flask.helpers import send_file, send_from_directory
 from werkzeug.utils import secure_filename
-from flask_restful import Resource, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
+from flask_restful import Resource, marshal, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
 from flask_praetorian import auth_required
 from werkzeug.wrappers import Response
 from .. import database
@@ -86,7 +86,9 @@ class UsuarioEspecifico( Resource ):
         return {}, 200
 
 class PublicacionesFavoritas( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @auth_required
+    @marshal_with( publicacion_fields )
     def get( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
@@ -97,6 +99,8 @@ class PublicacionesFavoritas( Resource ):
             abort( 404, message="No hay publicaciones favoritas." )
         return publicaciones_favoritas, 200
 
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
     def post( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
