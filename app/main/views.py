@@ -86,8 +86,16 @@ class UsuarioEspecifico( Resource ):
         return {}, 200
 
 class PublicacionesFavoritas( Resource ):
+    @auth_required
     def get( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+        
+        publicaciones_favoritas = database.session.query( Publicacion ).join( PublicacionesFavoritas, PublicacionesFavoritas.clave_publicacion==Publicacion.clave_publicacion ).filter( PublicacionesFavoritas.clave_usuario==clave_usuario ).all()
+        if not publicaciones_favoritas:
+            abort( 404, message="No hay publicaciones favoritas." )
+        return publicaciones_favoritas, 200
 
     def post( self, clave_usuario ):
         return 200
