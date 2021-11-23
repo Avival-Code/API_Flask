@@ -14,3 +14,8 @@ usuario_put_args.add_argument( "correo_electronico", type=str, help="El correo e
 publicaciones_favoritas_put_args = reqparse.RequestParser()
 publicaciones_favoritas_put_args.add_argument( "clave_usuario", type=int, help="Se requiere la clave del usuario", required=True )
 publicaciones_favoritas_put_args.add_argument( "clave_publicacion", type=int, help="Se requiere la clave de la publicación", required=True )
+
+usuarios_favoritos_put_arsg = reqparse.RequestParser()
+usuarios_favoritos_put_arsg.add_argument( "clave_usuario", type=int, help="Se requiere la clave del usuario", required=True )
+usuarios_favoritos_put_arsg.add_argument( "clave_usuario_favorito", type=int, help="Se requiere la clave del usuario favorito", required=True )
+
