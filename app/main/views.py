@@ -133,8 +133,18 @@ class PublicacionesFavoritas( Resource ):
         return {}, 200
 
 class UsuariosFavoritos( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
+    @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        usuarios = database.session.query( Usuario ).join( UsuariosFavoritos, UsuariosFavoritos.clave_usuario_favorito==Usuario.clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario==clave_usuario ).all()
+        if not usuarios:
+            abort( 404, message="No hay usuarios favoritos." )
+        return usuarios, 200
 
     def post( self, clave_usuario ):
         return 200
