@@ -109,7 +109,7 @@ class PublicacionesFavoritas( Resource ):
         args = publicaciones_favoritas_put_args.parse_args()
         favorito_existe = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
         if favorito_existe:
-            abort( 409, message="El favorito ya esta agregado a la lista." )
+            abort( 409, message="La publicación ya esta en la lista de favoritos." )
 
         publicacion_favorita = PublicacionesFavoritas( clave_usuario=clave_usuario, clave_publicacion=args[ 'clave_publicacion' ] )
         database.session.add( publicacion_favorita )
@@ -146,8 +146,22 @@ class UsuariosFavoritos( Resource ):
             abort( 404, message="No hay usuarios favoritos." )
         return usuarios, 200
 
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
     def post( self, clave_usuario ):
-        return 200
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        args = usuarios_favoritos_put_args.parse_args()
+        favorito_existe = UsuariosFavoritos.query.filter_by( clave_usuario==clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario_favorito==args[ "clave_usuario_favorito" ] ).first()
+        if favorito_existe:
+            abort( 404, message="El usuario ya esta en la lista de favoritos." )
+
+        favorito = UsuariosFavoritos( clave_usuario=clave_usuario, clave_usuario_favorito=args[ "clave_usuario_favorito" ] )
+        database.session.add( favorito )
+        database.session.commit()
+        return {}, 201
 
 
 class UploadImagen( Resource ):
