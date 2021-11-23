@@ -98,12 +98,19 @@ class PublicacionesFavoritas( Resource ):
         return publicaciones_favoritas, 200
 
     def post( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
-        
-        return 200
+        args = publicaciones_favoritas_put_args.parse_args()
+        favorito_existe = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
+        if not favorito_existe:
+            abort( 409, message="El favorito ya esta agregado a la lista." )
+
+        publicacion_favorita = PublicacionesFavoritas( clave_usuario=clave_usuario, clave_publicacion=args[ 'clave_publicacion' ] )
+        database.session.add( publicacion_favorita )
+        database.session.commit()
+        return {}, 201
 
 class UsuariosFavoritos( Resource ):
     def get( self, clave_usuario ):
