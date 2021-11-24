@@ -18,9 +18,8 @@ api.add_resource( Usuarios, "/usuarios" )
 api.add_resource( UsuarioEspecifico, "/usuarios/<int:clave_usuario>" )
 api.add_resource( PublicacionesFavoritas, "/usuarios/<int:clave_usuario>/publicacionesfavoritas" )
 api.add_resource( UsuariosFavoritos, "/usuarios/<int:clave_usuario>/usuariosfavoritos" )
-api.add_resource( UploadImagen, "/SubirImagen")
-api.add_resource( RecuperarImagen, "/RecuperarImagen" )
-api.add_resource( DescargarImagen, "/DescargarImagen") 
+
+
 
 
 app.app_context().push()

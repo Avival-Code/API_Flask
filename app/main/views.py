@@ -5,6 +5,8 @@ import re
 from flask import make_response, render_template, jsonify, send_from_directory
 from flask.globals import session
 from flask.helpers import send_file, send_from_directory
+from sqlalchemy.sql.selectable import ReturnsRows
+from werkzeug.exceptions import default_exceptions
 from werkzeug.utils import secure_filename
 from flask_restful import Resource, marshal, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
 from flask_praetorian import auth_required
@@ -178,53 +180,10 @@ class UsuariosFavoritos( Resource ):
         database.session.delete( usuario_favorito )
         database.session.commit()
 
-class UploadImagen( Resource ):
-
-    def post(self):
-        foto = request.files['file']
-        if not foto:
-            return "No se a seleccionado ningun archivo", 404
-        try:
-            foto.save(os.path.join("Imagenes", secure_filename(foto.filename)))
-            return "se guardo con exito", 201
-        except IOError:
-            return "No se puede guardar ahora mismo", 403
-
-
-
-class RecuperarImagen( Resource ):
-   
-
-    def post(self):
-            foto = request.get_json()
-            nombreFoto = foto['NombreFoto']
-            if not nombreFoto:
-                return "No se especifica que foto decea recuperar", 403
-            try:
-                return send_file(os.path.join("Imagenes"),nombreFoto, as_attachment=False) , 201
-            except Error:
-                    return "no se puede recuperar la foto", 404
-            
-
-class DescargarImagen( Resource ):
-    
-    def get(self):
-            foto = request.get_json()
-            nombreFoto = foto['NombreFoto']
-            if not nombreFoto:
-                return "No se especifica que foto decea recuperar", 403
-            try:
-                
-                return send_file(os.path.join("Imagenes"),nombreFoto, as_attachment=False) , 201
-            except Error :
-                    return "no se puede recuperar la foto", 404
-
-
-
 class Publicaciones (Resource):
     def post(self):
         try: 
-            publicacionaSubir = request.get_json()
+            publicacionaSubir = publicacion_put_args.parse_args()
             publicacionNueva = Publicacion(nombre_publicacion = publicacionaSubir['nombre_publicacion'],descripcion=publicacionaSubir['descripcion'],calificacion_general = publicacionaSubir['calificacion_general'], categoria = publicacionaSubir['categoria'],fecha_publicacion= datetime.now() )
             database.session.add(publicacionNueva)
             database.session.commit()
@@ -239,33 +198,37 @@ class Publicaciones (Resource):
             return publicaciones, 201
         except: Error
         return 404
-    
 
 
-    def get(self):
+class PublicacionesExpecificas (Resource):
+      
+      def get(self,clave_publicacion):
         try:
-            publicacionBuscar =request.get_json()
-            idpublicacion = publicacionBuscar['clave_publicacion']
-            publicacionEncontrada = database.session.query(Publicacion).filter_by(clave_publicacion = idpublicacion)
+            publicacionEncontrada = Publicacion.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
 
             if not publicacionEncontrada:
-                return publicacionEncontrada, 201
-                
-            return "No se encontro la publicacion", 404
+                return "No se encontro la publicacion", 404
+            return publicacionEncontrada, 201
         except: Error
 
         return "Excepcion encontrada", 404
-        
-
     
 
+      def delete(self, clave_publicacion):
+          publicacion = Publicacion.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
+          if not publicacion:
+              abort (404, message= "No se encontro la publicacion especifica")
+
+          database.session.delete(publicacion)
+          database.session.commit()
+        
 
 
 class Comentarios(Resource):
     def post(self):
         try:
 
-            comentarioSubir = request.get_json()
+            comentarioSubir = comentario_usuario_put_args.parse_args()
             comentarioNuevo = ComentarioUsuario(clave_publicacion = comentarioSubir['clave_publicacion'],clave_usuario = comentarioSubir['clave_usuario'], comentario = comentarioSubir['comentario'])
             database.session.add(comentarioNuevo)
             database.session.commit()
@@ -273,18 +236,63 @@ class Comentarios(Resource):
         except Error:
             return 404
           
-    def get (self):
+    def get (self, clave_publicacion):
         try:
-            publicacion = request.get_json()
-            idpublicacion = publicacion['clave_publicacion']
-            comentarioPublicacion = database.session.query(ComentarioUsuario).filter_by(clave_publicacion= idpublicacion)
+            
+            comentarioPublicacion = ComentarioUsuario.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
             if not comentarioPublicacion:
-                return comentarioPublicacion, 201
-
-            return "No hay comentarios", 404 
+                return "No hay comentarios", 404
+            return comentarioPublicacion, 201 
         except Error:
             return "Exepcion Encontrada",404
-          
-class AgregarCalificacionPublicacion(Resource):
+
+    def delete(self):
+            clave_comentario = comentario_usuario_put_args.parse_args()
+            comentarioEncontrado = ComentarioUsuario.query.filter_by(clave_comentario == clave_comentario['clave_comentario']).one_or_none()
+            if not comentarioEncontrado:
+              abort (404, message= "No se encontro la publicacion especifica")
+
+            database.session.delete(comentarioEncontrado)
+            database.session.commit()
+
+
+class multimedia( Resource ):
+
     def post(self):
-        return 404
+        
+        try: 
+            multimediaSubir = multimedia_put_args.parse_args()
+            multimediaNueva = Multimedia(clave_publicacion=multimediaSubir['clave_publicacion'], multimedia= ['multimedia'])
+            database.session.add(multimediaNueva)
+            database.session.commit()
+            return multimediaNueva, 201
+        except Error:
+            return 404
+
+
+    def get (self, clave_publicacion):
+        try:
+            
+            multimedia = Multimedia.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
+            if not multimedia:
+                return "No hay multimedia para esta publicacion", 404
+            return multimedia, 201 
+        except Error:
+            return "Exepcion Encontrada",404
+            
+class calificacionPublicacion(Resource):
+    def post(self):
+        try:
+            calificacionSubir = calificacion_publicacion_put_args.parse_args()
+            calificacionNueva = CalificacionPublicacion(clave_publicacion = calificacionSubir['clave_publicacion'], clave_usuario= calificacionSubir['clave_usuario'], calificacion=['calificacion'])
+            database.session.add(calificacionNueva)
+            database.session.commit()
+            return {}, 201
+        except Error:
+            return 404
+
+    def get(self,clave_publicacion):
+        calificaciones = CalificacionPublicacion.query.filter_by(clave_publicacion = clave_publicacion)
+        if not calificaciones:
+            return "No existe calificaciones para la publicacion", 404
+        return calificaciones, 201

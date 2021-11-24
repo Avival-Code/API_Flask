@@ -1,5 +1,7 @@
 from flask_restful import fields
 
+from app.models import ComentarioUsuario
+
 usuario_fields = {
     'clave_usuario': fields.Integer,
     'nombres': fields.String,
@@ -16,4 +18,25 @@ publicacion_fields = {
     'calificacion_general': fields.Float,
     'categoria': fields.Integer,
     'fecha_publicacion': fields.DateTime
+}
+
+comentario_usuario_fields = {
+    'clave_comentario': fields.Integer,
+    'clave_publicacion': fields.Integer,
+    'clave_usuario': fields.Integer,
+    'comentario' : fields.String
+
+}
+
+calificacion_publicacion_fields = {
+    'clave_calificacion': fields.Integer,
+    'clave_publicacion': fields.Integer,
+    'clave_usuarios': fields.Integer,
+    'calificacion': fields.Float
+}
+
+multimedia_fields = {
+    'clave_multimedia': fields.Integer,
+    'clave_publicacion': fields.Integer,
+    'multimedia': fields.String
 }
