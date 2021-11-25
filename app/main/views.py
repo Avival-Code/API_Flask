@@ -269,7 +269,7 @@ class multimedia( Resource ):
         except Error:
             return 404
 
-
+class multimediaExpecifica(Resource):
     def get (self, clave_publicacion):
         try:
             
@@ -291,6 +291,7 @@ class calificacionPublicacion(Resource):
         except Error:
             return 404
 
+class calificacionPublicacionEspecifica(Resource):
     def get(self,clave_publicacion):
         calificaciones = CalificacionPublicacion.query.filter_by(clave_publicacion = clave_publicacion)
         if not calificaciones:
