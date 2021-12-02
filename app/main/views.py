@@ -200,6 +200,10 @@ class Publicaciones (Resource):
         return 404
 
 
+
+        
+
+
 class PublicacionesExpecificas (Resource):
       
       def get(self,clave_publicacion):
@@ -221,6 +225,17 @@ class PublicacionesExpecificas (Resource):
 
           database.session.delete(publicacion)
           database.session.commit()
+
+          return 200
+
+
+      def put(self, clave_publicacion):
+          publicacionActualizada = publicacion_put_args.parse_args()
+          publicacion = Publicacion.query.filter_by(clave_publicacion== clave_publicacion).one_or_none().update(dict(nombre_publicacion = publicacionActualizada["nombre_publicacion"], descripcion = publicacionActualizada["descripcion"]))
+          database.session.commit()
+          return 200
+          
+          
         
 
 
