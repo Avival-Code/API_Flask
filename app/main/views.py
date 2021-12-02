@@ -201,7 +201,7 @@ class Publicaciones (Resource):
 
 
 
-        
+
 
 
 class PublicacionesExpecificas (Resource):
@@ -284,6 +284,9 @@ class multimedia( Resource ):
         except Error:
             return 404
 
+
+    
+
 class multimediaExpecifica(Resource):
     def get (self, clave_publicacion):
         try:
@@ -294,6 +297,14 @@ class multimediaExpecifica(Resource):
             return multimedia, 201 
         except Error:
             return "Exepcion Encontrada",404
+
+    def put (self, clave_publicacion):
+        try:
+            multimediaNueva = multimedia_put_args.parse_args()
+            multimedia = Multimedia.query.filter_by(clave_publicacion == clave_publicacion).one_or_none().update(dict(multimedia = multimediaNueva["multimedia"]))
+            return 200
+        except Error:
+            return 400
             
 class calificacionPublicacion(Resource):
     def post(self):
