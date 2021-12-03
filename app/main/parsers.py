@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Text
 from flask_restful import reqparse
 
 login_put_args = reqparse.RequestParser()
@@ -32,7 +31,7 @@ publicacion_put_args.add_argument( "descripcion",type=str,help="Es necesaria la 
 publicacion_put_args.add_argument( "calificacion_general", type=float, help="En nesesaria la calificacion de la publicacion", required=False )
 publicacion_put_args.add_argument( "categoria", type=int, help="Es necesaria la categoria de la publicacion", required=True )
 publicacion_put_args.add_argument( "fecha_publicacion", type=date, help="Es necesaria la fecha de la publicacion", required=False )
-publicacion_put_args.add_argument( "multimedia", type=Text, help="Es necesario el archivo", required=True )
+publicacion_put_args.add_argument( "multimedia", type=str, help="Es necesario el archivo", required=True )
 
 calificacion_publicacion_put_args = reqparse.RequestParser()
 calificacion_publicacion_put_args.add_argument( "clave_publicacion", type=int,help="Es necesaria la clave de publicacion", required=True )
@@ -41,7 +40,7 @@ calificacion_publicacion_put_args.add_argument( "calificacion", type=float, help
 
 multimedia_put_args = reqparse.RequestParser()
 multimedia_put_args.add_argument( "clave_publicacion", type= int, help="Es necesaria la clave de la publicacion", required=True )
-multimedia_put_args.add_argument( "multimedia", type=Text, help="Es necesario el archivo", required=True )
+multimedia_put_args.add_argument( "multimedia", type=str, help="Es necesario el archivo", required=True )
 
 
 
