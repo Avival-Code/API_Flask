@@ -186,6 +186,7 @@ class PublicacionesGeneral( Resource ):
         return publicaciones, 200
 
 class PublicacionesUsuario( Resource ):
+    decorator = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get ( self, clave_usuario ):
         try:
@@ -196,7 +197,7 @@ class PublicacionesUsuario( Resource ):
 
     @auth_required
     @marshal_with( publicacion_fields )
-    def post( self ):
+    def post( self, clave_usuario ):
         try: 
             publicacionaSubir = publicacion_put_args.parse_args()
             publicacionNueva = Publicacion( nombre_publicacion = publicacionaSubir[ 'nombre_publicacion' ],descripcion=publicacionaSubir[ 'descripcion' ],calificacion_general = 0.0, categoria = publicacionaSubir[ 'categoria' ],fecha_publicacion= datetime.now() )
