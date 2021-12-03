@@ -188,20 +188,28 @@ class PublicacionesGeneral( Resource ):
 class PublicacionesUsuario( Resource ):
     decorator = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
-    def get ( self, clave_usuario ):
+    def get ( self, clave_usuario_in ):
         try:
-            publicaciones = database.session.query( Publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).filter( UsuarioPublicacion.clave_usuario==clave_usuario ).all()
+            publicaciones = database.session.query( Publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).filter( UsuarioPublicacion.clave_usuario==clave_usuario_in ).all()
             return publicaciones, 200
         except: Error
         return 404
 
     @auth_required
     @marshal_with( publicacion_fields )
-    def post( self, clave_usuario ):
+    def post( self, clave_usuario_in ):
         try: 
-            publicacionaSubir = publicacion_put_args.parse_args()
-            publicacionNueva = Publicacion( nombre_publicacion = publicacionaSubir[ 'nombre_publicacion' ],descripcion=publicacionaSubir[ 'descripcion' ],calificacion_general = 0.0, categoria = publicacionaSubir[ 'categoria' ],fecha_publicacion= datetime.now() )
+            publicacionArgs = publicacion_put_args.parse_args()
+            publicacionNueva = Publicacion( nombre_publicacion = publicacionArgs[ 'nombre_publicacion' ],descripcion=publicacionArgs[ 'descripcion' ],calificacion_general = 0.0, categoria = publicacionArgs[ 'categoria' ],fecha_publicacion= datetime.now() )
             database.session.add( publicacionNueva )
+            database.session.commit()
+
+            registro = UsuarioPublicacion( clave_usuario=clave_usuario_in, clave_publicacion=publicacionNueva.clave_publicacion )
+            database.session.add( registro )
+            database.session.commit()
+
+            multimedia = Multimedia( clave_publicacion=publicacionNueva.clave_publicacion ,multimedia=publicacionArgs[ 'multimedia' ] )
+            database.session.add( multimedia )
             database.session.commit()
             return publicacionNueva, 201
         except Error:

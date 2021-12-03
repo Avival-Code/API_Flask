@@ -24,7 +24,7 @@ api.add_resource( multimediaExpecifica, "/multimedia/<int:clave_publicacion>/obt
 api.add_resource( multimedia, "/multimedia" )
 api.add_resource( Comentarios, "/comentarios/<int:clave_publicacion>" )
 api.add_resource( PublicacionesGeneral, "/publicaciones" )
-api.add_resource( PublicacionesUsuario, "/publicaciones/<int:clave_usuario>" )
+api.add_resource( PublicacionesUsuario, "/publicaciones/<int:clave_usuario_in>" )
 api.add_resource( PublicacionesExpecificas, "/publicaciones/<int:clave_publicacion>/publicacionespecifica" )
 
 
