@@ -178,64 +178,71 @@ class UsuariosFavoritos( Resource ):
         database.session.delete( usuario_favorito )
         database.session.commit()
 
-class Publicaciones (Resource):
-    def post(self):
+class PublicacionesGeneral( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( publicacion_fields )
+    def get( self ):
+        publicaciones = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).all()
+        return publicaciones, 200
+
+class PublicacionesUsuario( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( publicacion_fields )
+    def get ( self, clave_usuario_in ):
+        try:
+            publicaciones = database.session.query( Publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).filter( UsuarioPublicacion.clave_usuario==clave_usuario_in ).all()
+            return publicaciones, 200
+        except Error:
+            return 404
+
+    decorators = [ limiter.limit( "50 per day" ) ]
+    @auth_required
+    @marshal_with( publicacion_fields )
+    def post( self, clave_usuario_in ):
         try: 
-            publicacionaSubir = publicacion_put_args.parse_args()
-            publicacionNueva = Publicacion(nombre_publicacion = publicacionaSubir['nombre_publicacion'],descripcion=publicacionaSubir['descripcion'],calificacion_general = publicacionaSubir['calificacion_general'], categoria = publicacionaSubir['categoria'],fecha_publicacion= datetime.now() )
-            database.session.add(publicacionNueva)
+            publicacionArgs = publicacion_put_args.parse_args()
+            publicacionNueva = Publicacion( nombre_publicacion = publicacionArgs[ 'nombre_publicacion' ],descripcion=publicacionArgs[ 'descripcion' ],calificacion_general = 0.0, categoria = publicacionArgs[ 'categoria' ],fecha_publicacion= datetime.now() )
+            database.session.add( publicacionNueva )
+            database.session.commit()
+
+            registro = UsuarioPublicacion( clave_usuario=clave_usuario_in, clave_publicacion=publicacionNueva.clave_publicacion )
+            database.session.add( registro )
+            database.session.commit()
+
+            multimedia = Multimedia( clave_publicacion=publicacionNueva.clave_publicacion ,multimedia=publicacionArgs[ 'multimedia' ] )
+            database.session.add( multimedia )
             database.session.commit()
             return publicacionNueva, 201
         except Error:
             return 404
 
-
-    def get (self):
+class PublicacionesExpecificas( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( publicacion_fields )
+    def get( self, clave_publicacion ):
         try:
-            publicaciones = database.session.query(Publicacion)
-            return publicaciones, 201
-        except: Error
-        return 404
-
-
-
-
-
-
-class PublicacionesExpecificas (Resource):
-      
-      def get(self,clave_publicacion):
-        try:
-            publicacionEncontrada = Publicacion.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
-
+            publicacionEncontrada = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).filter( Publicacion.clave_publicacion==clave_publicacion ).one_or_none()
             if not publicacionEncontrada:
-                return "No se encontro la publicacion", 404
-            return publicacionEncontrada, 201
-        except: Error
-
-        return "Excepcion encontrada", 404
+                abort( 404, message="No se encontró la publicación especificada" )
+            return publicacionEncontrada, 200
+        except Error:
+            return 404
     
+    decorators = [ limiter.limit( "50 per day" ) ]
+    @auth_required
+    def delete( self, clave_publicacion ):
+        register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
+        if not register:
+            abort (404, message= "No se encontro la publicacion especificada")
 
-      def delete(self, clave_publicacion):
-          publicacion = Publicacion.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
-          if not publicacion:
-              abort (404, message= "No se encontro la publicacion especifica")
+        multimedia = Multimedia.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()    
+        publicacion = Publicacion.query.filter_by( clave_publicacion == clave_publicacion ).one_or_none()
 
-          database.session.delete(publicacion)
-          database.session.commit()
-
-          return 200
-
-
-      def put(self, clave_publicacion):
-          publicacionActualizada = publicacion_put_args.parse_args()
-          publicacion = Publicacion.query.filter_by(clave_publicacion== clave_publicacion).one_or_none().update(dict(nombre_publicacion = publicacionActualizada["nombre_publicacion"], descripcion = publicacionActualizada["descripcion"]))
-          database.session.commit()
-          return 200
-          
-          
-        
-
+        database.session.delete( register )
+        database.session.delete( multimedia )
+        database.session.delete( publicacion )
+        database.session.commit()
+        return 200
 
 class Comentarios(Resource):
     def post(self):
