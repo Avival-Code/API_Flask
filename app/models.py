@@ -37,7 +37,7 @@ class Publicacion( database.Model ):
     descripcion = database.Column( database.String( 200 ), nullable=False )
     calificacion_general = database.Column( database.Float )
     categoria = database.Column( database.Integer, nullable=False )
-    fecha_publicacion = database.Column( database.Date )
+    fecha_publicacion = database.Column( database.DateTime )
 
     def __repr__( self ):
         return f"Publicacion( clave_publicacion = { self.clave_publicacion }, nombre_publicacion = { self.nombre_publicacion }, descripcion = { self.descripcion }, calificacion_general = { self.calificacion_general }, categoria = { self.categoria }, fecha_publicacion = { self.fecha_publicacion },  )"
