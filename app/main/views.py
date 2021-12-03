@@ -35,8 +35,8 @@ class Usuarios( Resource ):
         return usuarios, 200
 
     decorators = [ limiter.limit( "2 per day" ) ]
-    @marshal_with( usuario_fields )
     @cross_origin( allow_headers=[ 'Content-Type' ] )
+    @marshal_with( usuario_fields )
     def post( self ):
         usuario_args = usuario_put_args.parse_args()
         usuario_existe = Usuario.query.filter_by( nombre_usuario=usuario_args[ 'nombre_usuario' ] ).one_or_none()
