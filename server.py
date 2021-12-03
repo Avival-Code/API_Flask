@@ -16,6 +16,9 @@ api.add_resource( MainPage, "/" )
 api.add_resource( Login, "/login" )
 api.add_resource( Usuarios, "/usuarios" )
 api.add_resource( UsuarioEspecifico, "/usuarios/<int:clave_usuario>" )
+api.add_resource( PublicacionesGeneral, "/publicaciones" )
+api.add_resource( PublicacionesUsuario, "/publicaciones/<int:clave_usuario_in>" )
+api.add_resource( PublicacionesExpecificas, "/publicaciones/<int:clave_publicacion>" )
 api.add_resource( PublicacionesFavoritas, "/usuarios/<int:clave_usuario>/publicacionesfavoritas" )
 api.add_resource( UsuariosFavoritos, "/usuarios/<int:clave_usuario>/usuariosfavoritos" )
 api.add_resource( calificacionPublicacion, "/publicacion/calificacion/agregarcalificacion" )
@@ -23,12 +26,6 @@ api.add_resource( calificacionPublicacionEspecifica, "/publicacion/calificacion/
 api.add_resource( multimediaExpecifica, "/multimedia/<int:clave_publicacion>/obtenermultimedia" )
 api.add_resource( multimedia, "/multimedia" )
 api.add_resource( Comentarios, "/comentarios/<int:clave_publicacion>" )
-api.add_resource( PublicacionesGeneral, "/publicaciones" )
-api.add_resource( PublicacionesUsuario, "/publicaciones/<int:clave_usuario_in>" )
-api.add_resource( PublicacionesExpecificas, "/publicaciones/<int:clave_publicacion>/publicacionespecifica" )
-
-
-
 
 app.app_context().push()
 database.create_all()

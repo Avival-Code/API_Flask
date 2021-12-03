@@ -233,10 +233,10 @@ class PublicacionesExpecificas( Resource ):
     def delete( self, clave_publicacion ):
         register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
         if not register:
-            abort (404, message= "No se encontro la publicacion especifica")
+            abort (404, message= "No se encontro la publicacion especificada")
 
         multimedia = Multimedia.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()    
-        publicacion = Publicacion.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
+        publicacion = Publicacion.query.filter_by( clave_publicacion == clave_publicacion ).one_or_none()
 
         database.session.delete( register )
         database.session.delete( multimedia )
