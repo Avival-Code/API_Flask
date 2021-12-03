@@ -185,7 +185,15 @@ class PublicacionesGeneral( Resource ):
         publicaciones = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).all()
         return publicaciones, 200
 
-class Publicaciones( Resource ):
+class PublicacionesUsuario( Resource ):
+    @marshal_with( publicacion_fields )
+    def get ( self, clave_usuario ):
+        try:
+            publicaciones = database.session.query( Publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).filter( UsuarioPublicacion.clave_usuario==clave_usuario ).all()
+            return publicaciones, 200
+        except: Error
+        return 404
+
     @auth_required
     @marshal_with( publicacion_fields )
     def post( self ):
@@ -197,14 +205,6 @@ class Publicaciones( Resource ):
             return publicacionNueva, 201
         except Error:
             return 404
-
-    @marshal_with( publicacion_fields )
-    def get (self):
-        try:
-            publicaciones = database.session.query(Publicacion)
-            return publicaciones, 201
-        except: Error
-        return 404
 
 
 
