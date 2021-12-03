@@ -13,6 +13,7 @@ usuario_fields = {
 
 publicacion_fields = {
     'clave_publicacion': fields.Integer,
+    'clave_usuario': fields.Integer,
     'nombre_publicacion': fields.String,
     'descripcion': fields.String,
     'calificacion_general': fields.Float,
