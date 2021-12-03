@@ -17,7 +17,8 @@ publicacion_fields = {
     'descripcion': fields.String,
     'calificacion_general': fields.Float,
     'categoria': fields.Integer,
-    'fecha_publicacion': fields.DateTime
+    'fecha_publicacion': fields.DateTime,
+    'multimedia': fields.String
 }
 
 comentario_usuario_fields = {

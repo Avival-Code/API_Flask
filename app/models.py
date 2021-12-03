@@ -83,3 +83,10 @@ class UsuariosFavoritos( database.Model ):
 
     def __repr__( self ):
         return f"UsuariosFavoritos( clave_registro = { self.clave_registro }, clave_usuario = { self.clave_usuario }, clave_usuario_favorito = { self.clave_usuario_favorito } )"
+
+class UsuarioPublicacion( database.Model ):
+    clave_publicacion = database.Column( database.Integer, primary_key=True )
+    clave_usuario = database.Column( database.Integer, primary_key=True )
+
+    def __repr__( self ):
+        return f"UsuarioPublicacion( clave_publicacion = { self.clave_publicacion }, clave_usuario = { self.clave_usuario } )"
