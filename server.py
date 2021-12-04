@@ -23,7 +23,7 @@ api.add_resource( PublicacionesFavoritas, "/usuarios/<int:clave_usuario>/publica
 api.add_resource( UsuariosFavoritos, "/usuarios/<int:clave_usuario>/usuariosfavoritos" )
 api.add_resource( calificacionPublicacion, "/publicacion/calificacion/agregarcalificacion" )
 api.add_resource( calificacionPublicacionEspecifica, "/publicacion/calificacion/,<int:clave_publicacion>/obtenercalificacion" )
-api.add_resource( multimediaExpecifica, "/multimedia/<int:clave_publicacion>/obtenermultimedia" )
+api.add_resource( multimediaExpecifica, "/multimedia/<int:clave_publicacion_in>/obtenermultimedia" )
 api.add_resource( multimedia, "/multimedia" )
 api.add_resource( Comentarios, "/comentarios/<int:clave_publicacion>" )
 

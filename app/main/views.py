@@ -300,15 +300,16 @@ class multimedia( Resource ):
     
 
 class multimediaExpecifica(Resource):
-    def get (self, clave_publicacion):
-        try:
+    
+    @marshal_with( multimedia_fields )
+    def get (self, clave_publicacion_in):
+       
             
-            multimedia = Multimedia.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
+            multimedia = Multimedia.query.filter_by(clave_publicacion = clave_publicacion_in).one_or_none()
             if not multimedia:
                 return "No hay multimedia para esta publicacion", 404
             return multimedia, 201 
-        except Error:
-            return "Exepcion Encontrada",404
+      
 
     def put (self, clave_publicacion):
         try:
