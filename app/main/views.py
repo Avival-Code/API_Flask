@@ -311,10 +311,10 @@ class multimediaExpecifica(Resource):
             return multimedia, 201 
       
 
-    def put (self, clave_publicacion):
+    def put (self, clave_publicacion_in):
         try:
             multimediaNueva = multimedia_put_args.parse_args()
-            multimedia = Multimedia.query.filter_by(clave_publicacion == clave_publicacion).one_or_none().update(dict(multimedia = multimediaNueva["multimedia"]))
+            multimedia = Multimedia.query.filter_by(clave_publicacion = clave_publicacion_in).one_or_none().update(dict(multimedia = multimediaNueva["multimedia"]))
             return 200
         except Error:
             return 400
