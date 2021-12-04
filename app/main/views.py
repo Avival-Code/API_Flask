@@ -289,6 +289,13 @@ class multimedia( Resource ):
         except Error:
             return 404
 
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( multimedia_fields )
+    def get( self ):
+        multimedia = database.session.query( Multimedia ).all()
+        return multimedia, 200
+
+    
 
     
 
