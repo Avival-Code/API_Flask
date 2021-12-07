@@ -250,7 +250,7 @@ class Search( Resource ):
     def get( self, search_query ):
         publicaciones = Publicacion.query.filter( Publicacion.nombre_publicacion.contains( search_query ) ).all()
         if not publicaciones:
-            abort( 404, "No se encontraron publicaciones" )
+            abort( 404, message="No se encontraron publicaciones" )
 
         resultado = []
         for publicacion in publicaciones:
