@@ -244,7 +244,7 @@ class PublicacionesExpecificas( Resource ):
         database.session.commit()
         return 200
 
-class Search( Resource ):
+class SearchPublicaciones( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self, search_query ):
@@ -258,6 +258,20 @@ class Search( Resource ):
             multimedia = Multimedia.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
             resultado.append( { 'clave_publicacion': publicacion.clave_publicacion, 'clave_usuario': register.clave_usuario, 'nombre_publicacion': publicacion.nombre_publicacion, 'descripcion': publicacion.descripcion, 'calificacion_general': publicacion.calificacion_general, 'categoria': publicacion.categoria, 'fecha_publicacion': publicacion.fecha_publicacion, 'multimedia': multimedia.multimedia } )
         
+        return resultado, 200
+
+class SearchUsuarios( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( usuario_fields )
+    def get( self, search_query ):
+        usuarios = Usuario.query.filter( Usuario.nombre_usuario.contains( search_query ) ).all()
+        if not usuarios:
+            abort( 404, message="No se encontraron usuarios" )
+
+        resultado = []
+        for usuario in usuarios:
+            resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario } )
+
         return resultado, 200
             
 
