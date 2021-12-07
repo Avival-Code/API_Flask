@@ -26,6 +26,7 @@ api.add_resource( calificacionPublicacionEspecifica, "/publicacion/calificacion/
 api.add_resource( multimediaExpecifica, "/multimedia/<int:clave_publicacion_in>/obtenermultimedia" )
 api.add_resource( multimedia, "/multimedia" )
 api.add_resource( Comentarios, "/comentarios/<int:clave_publicacion>" )
+api.add_resource( Search, "/search/<string:search_query>" )
 
 app.app_context().push()
 database.create_all()

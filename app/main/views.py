@@ -244,6 +244,23 @@ class PublicacionesExpecificas( Resource ):
         database.session.commit()
         return 200
 
+class Search( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( publicacion_fields )
+    def get( self, search_query ):
+        publicaciones = Publicacion.query.filter( Publicacion.nombre_publicacion.contains( search_query ) ).all()
+        if not publicaciones:
+            abort( 404, "No se encontraron publicaciones" )
+
+        resultado = []
+        for publicacion in publicaciones:
+            register = UsuarioPublicacion.query.filter_by( UsuarioPublicacion.clave_publicacion==publicacion.clave_publicacion ).one_or_none()
+            multimedia = Multimedia.query.filter_by( Multimedia.clave_publicacion==publicacion.clave_publicacion ).one_or_none()
+            resultado.append( { 'clave_publicacion': publicacion.clave_publicacion, 'clave_usuario': register.clave_usuario, 'nombre_publicacion': publicacion.nombre_publicacion, 'descripcion': publicacion.descripcion, 'calificacion_general': publicacion.calificacion_general, 'categoria': publicacion.categoria, 'fecha_publicacion': publicacion.fecha_publicacion, 'multimedia': multimedia.multimedia } )
+        
+        return resultado, 200
+            
+
 class Comentarios(Resource):
     def post(self):
         try:
