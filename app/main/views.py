@@ -16,11 +16,6 @@ from ..models import *
 from .parsers import *
 from .fields import *
 
-class MainPage( Resource ):
-    def get( self ):
-        headers = { 'Content-Type': 'Text/html' }
-        return make_response( render_template( 'main_page.html' ), 200, headers )
-
 class Login( Resource ):
     def post( self ):
         login_args = login_put_args.parse_args()
@@ -29,6 +24,7 @@ class Login( Resource ):
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
 
 class Usuarios( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( usuario_fields )
     def get( self ):
         usuarios = Usuario.query.all()
@@ -43,12 +39,13 @@ class Usuarios( Resource ):
         if usuario_existe:
             abort( 409, message="El nombre de usuario ya se esta utilizando." )
 
-        usuario = Usuario( nombres=usuario_args[ 'nombres' ], apellidos=usuario_args[ 'apellidos' ], correo_electronico=usuario_args[ 'correo_electronico' ], nombre_usuario=usuario_args[ 'nombre_usuario' ], contrasena=guard.hash_password( usuario_args[ 'contrasena' ] ) )
+        usuario = Usuario( nombres=usuario_args[ 'nombres' ], apellidos=usuario_args[ 'apellidos' ], correo_electronico=usuario_args[ 'correo_electronico' ], nombre_usuario=usuario_args[ 'nombre_usuario' ], contrasena=guard.hash_password( usuario_args[ 'contrasena' ] ), fecha_union=datetime.now(), foto_perfil='' )
         database.session.add( usuario )
         database.session.commit()
         return usuario, 201
 
 class UsuarioEspecifico( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
@@ -243,6 +240,37 @@ class PublicacionesExpecificas( Resource ):
         database.session.delete( publicacion )
         database.session.commit()
         return 200
+
+class SearchPublicaciones( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( publicacion_fields )
+    def get( self, search_query ):
+        publicaciones = Publicacion.query.filter( Publicacion.nombre_publicacion.contains( search_query ) ).all()
+        if not publicaciones:
+            abort( 404, message="No se encontraron publicaciones" )
+
+        resultado = []
+        for publicacion in publicaciones:
+            register = UsuarioPublicacion.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
+            multimedia = Multimedia.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
+            resultado.append( { 'clave_publicacion': publicacion.clave_publicacion, 'clave_usuario': register.clave_usuario, 'nombre_publicacion': publicacion.nombre_publicacion, 'descripcion': publicacion.descripcion, 'calificacion_general': publicacion.calificacion_general, 'categoria': publicacion.categoria, 'fecha_publicacion': publicacion.fecha_publicacion, 'multimedia': multimedia.multimedia } )
+        
+        return resultado, 200
+
+class SearchUsuarios( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( usuario_fields )
+    def get( self, search_query ):
+        usuarios = Usuario.query.filter( Usuario.nombre_usuario.contains( search_query ) ).all()
+        if not usuarios:
+            abort( 404, message="No se encontraron usuarios" )
+
+        resultado = []
+        for usuario in usuarios:
+            resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario } )
+
+        return resultado, 200
+            
 
 class Comentarios(Resource):
     def post(self):

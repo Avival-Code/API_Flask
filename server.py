@@ -12,7 +12,6 @@ app = create_app( os.environ.get( "CURRENT_CONFIG" ) or 'default' )
 
 api = Api( app )
 
-api.add_resource( MainPage, "/" )
 api.add_resource( Login, "/login" )
 api.add_resource( Usuarios, "/usuarios" )
 api.add_resource( UsuarioEspecifico, "/usuarios/<int:clave_usuario>" )
@@ -26,6 +25,8 @@ api.add_resource( calificacionPublicacionEspecifica, "/publicacion/calificacion/
 api.add_resource( multimediaExpecifica, "/multimedia/<int:clave_publicacion_in>/obtenermultimedia" )
 api.add_resource( multimedia, "/multimedia" )
 api.add_resource( Comentarios, "/comentarios/<int:clave_publicacion>" )
+api.add_resource( SearchPublicaciones, "/publicaciones/search/<string:search_query>" )
+api.add_resource( SearchUsuarios, "/usuarios/search/<string:search_query>" )
 
 app.app_context().push()
 database.create_all()

@@ -7,8 +7,9 @@ usuario_fields = {
     'nombres': fields.String,
     'apellidos': fields.String,
     'nombre_usuario': fields.String,
-    'constrasena': fields.String,
-    'correo_electronico': fields.String
+    'correo_electronico': fields.String,
+    'fecha_union': fields.DateTime,
+    'foto_perfil': fields.String
 }
 
 publicacion_fields = {
