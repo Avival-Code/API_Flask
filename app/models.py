@@ -7,6 +7,8 @@ class Usuario( database.Model ):
     nombre_usuario = database.Column( database.String( 50 ), nullable=False, unique=True )
     contrasena = database.Column( database.Text, nullable=False )
     correo_electronico = database.Column( database.String( 50 ), nullable=False )
+    fecha_union = database.Column( database.DateTime )
+    foto_perfil = database.Column( database.Text( 4294000000 ) )
 
     @property
     def identity( self ):
@@ -29,7 +31,7 @@ class Usuario( database.Model ):
         return cls.query.filter_by( clave_usuario=id ).one_or_none()
 
     def __repr__( self ):
-        return f"Usuario( nombres = { self.nombres }, apellidos = { self.apellidos }, nombre_usuario = { self.nombre_usuario }, contrasena = { self.contrasena }, correo_electronico = { self.correo_electronico } )"
+        return f"Usuario( nombres = { self.nombres }, apellidos = { self.apellidos }, nombre_usuario = { self.nombre_usuario }, contrasena = { self.contrasena }, correo_electronico = { self.correo_electronico }, fecha_union = { self.fecha_union }, foto_perfil = { self.foto_perfil } )"
 
 class Publicacion( database.Model ):
     clave_publicacion = database.Column( database.Integer, primary_key=True, autoincrement=True )

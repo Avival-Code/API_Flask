@@ -16,11 +16,6 @@ from ..models import *
 from .parsers import *
 from .fields import *
 
-class MainPage( Resource ):
-    def get( self ):
-        headers = { 'Content-Type': 'Text/html' }
-        return make_response( render_template( 'main_page.html' ), 200, headers )
-
 class Login( Resource ):
     def post( self ):
         login_args = login_put_args.parse_args()
@@ -29,6 +24,7 @@ class Login( Resource ):
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
 
 class Usuarios( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( usuario_fields )
     def get( self ):
         usuarios = Usuario.query.all()
@@ -43,12 +39,13 @@ class Usuarios( Resource ):
         if usuario_existe:
             abort( 409, message="El nombre de usuario ya se esta utilizando." )
 
-        usuario = Usuario( nombres=usuario_args[ 'nombres' ], apellidos=usuario_args[ 'apellidos' ], correo_electronico=usuario_args[ 'correo_electronico' ], nombre_usuario=usuario_args[ 'nombre_usuario' ], contrasena=guard.hash_password( usuario_args[ 'contrasena' ] ) )
+        usuario = Usuario( nombres=usuario_args[ 'nombres' ], apellidos=usuario_args[ 'apellidos' ], correo_electronico=usuario_args[ 'correo_electronico' ], nombre_usuario=usuario_args[ 'nombre_usuario' ], contrasena=guard.hash_password( usuario_args[ 'contrasena' ] ), fecha_union=datetime.now(), foto_perfil='' )
         database.session.add( usuario )
         database.session.commit()
         return usuario, 201
 
 class UsuarioEspecifico( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
