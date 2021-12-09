@@ -323,6 +323,20 @@ class multimedia( Resource ):
         multimedia = database.session.query( Multimedia ).all()
         return multimedia, 200
 
+class MultimediaUsuario( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( multimedia_fields )
+    def get( self, clave_usuario ):
+        registros = UsuarioPublicacion.query.filter_by( clave_usuario=clave_usuario ).all()
+        if not registros:
+            abort( 404, message="El usuario no tiene publicaciones." )
+
+        imagenes = []
+        for registro in registros:
+            multimedia_especifica = Multimedia.query.filter_by( clave_publicacion=registro.clave_publicacion ).one_or_none()
+            imagenes.append( { 'clave_multimedia': multimedia_especifica.clave_multimedia, 'clave_publicacion': multimedia_especifica.clave_publicacion, 'multimedia': multimedia_especifica.multimedia } )
+        
+        return imagenes, 200
     
 
     
