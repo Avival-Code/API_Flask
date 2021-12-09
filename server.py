@@ -24,6 +24,7 @@ api.add_resource( calificacionPublicacion, "/publicacion/calificacion/agregarcal
 api.add_resource( calificacionPublicacionEspecifica, "/publicacion/calificacion/,<int:clave_publicacion>/obtenercalificacion" )
 api.add_resource( multimediaExpecifica, "/multimedia/<int:clave_publicacion_in>/obtenermultimedia" )
 api.add_resource( multimedia, "/multimedia" )
+api.add_resource( MultimediaUsuario, "/multimedia/<int:clave_usuario>" )
 api.add_resource( Comentarios, "/comentarios/<int:clave_publicacion>" )
 api.add_resource( SearchPublicaciones, "/publicaciones/search/<string:search_query>" )
 api.add_resource( SearchUsuarios, "/usuarios/search/<string:search_query>" )
