@@ -24,13 +24,16 @@ class Login( Resource ):
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
 
 class Usuarios( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    decorators = [ 
+        limiter.limit( "1 per second", methods=[ 'GET' ] ),
+        limiter.limit( "2 per day", methods=[ 'POST' ] )
+    ]
+
     @marshal_with( usuario_fields )
     def get( self ):
         usuarios = Usuario.query.all()
         return usuarios, 200
 
-    decorators = [ limiter.limit( "2 per day" ) ]
     @cross_origin( allow_headers=[ 'Content-Type' ] )
     @marshal_with( usuario_fields )
     def post( self ):
@@ -45,7 +48,12 @@ class Usuarios( Resource ):
         return usuario, 201
 
 class UsuarioEspecifico( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    decorators = [ 
+        limiter.limit( "1 per second", methods=[ 'GET' ] ),
+        limiter.limit( "10 per day", methods=[ 'PUT' ] ),
+        limiter.limit( "1 per day", methods=[ 'DELETE' ] )
+    ]
+
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
@@ -54,7 +62,6 @@ class UsuarioEspecifico( Resource ):
 
         return usuario, 200
 
-    decorators = [ limiter.limit( "10 per day" ) ]
     @auth_required
     @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
@@ -71,7 +78,6 @@ class UsuarioEspecifico( Resource ):
         database.session.commit()
         return usuario, 200
 
-    decorators = [ limiter.limit( "1 per day" ) ]
     @auth_required
     def delete( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
@@ -83,7 +89,8 @@ class UsuarioEspecifico( Resource ):
         return {}, 200
 
 class PublicacionesFavoritas( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    decorators = [ limiter.limit( "1 per second", methods=[ 'GET', 'POST', 'DELETE' ] ) ]
+
     @auth_required
     @marshal_with( publicacion_fields )
     def get( self, clave_usuario ):
@@ -96,7 +103,6 @@ class PublicacionesFavoritas( Resource ):
             abort( 404, message="No hay publicaciones favoritas." )
         return publicaciones_favoritas, 200
 
-    decorators = [ limiter.limit( "1 per second" ) ]
     @auth_required
     def post( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
@@ -113,7 +119,6 @@ class PublicacionesFavoritas( Resource ):
         database.session.commit()
         return {}, 201
 
-    decorators = [ limiter.limit( "1 per minute" ) ]
     @auth_required
     def delete( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
@@ -130,7 +135,8 @@ class PublicacionesFavoritas( Resource ):
         return {}, 200
 
 class UsuariosFavoritos( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    decorators = [ limiter.limit( "1 per second", methods=[ 'GET', 'POST', 'DELETE' ] ) ]
+
     @auth_required
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
@@ -143,7 +149,6 @@ class UsuariosFavoritos( Resource ):
             abort( 404, message="No hay usuarios favoritos." )
         return usuarios, 200
 
-    decorators = [ limiter.limit( "1 per second" ) ]
     @auth_required
     def post( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
@@ -160,7 +165,6 @@ class UsuariosFavoritos( Resource ):
         database.session.commit()
         return {}, 201
 
-    decorators = [ limiter.limit( "1 per second" ) ]
     @auth_required
     def delete( self, clave_usuario ):
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
@@ -183,7 +187,11 @@ class PublicacionesGeneral( Resource ):
         return publicaciones, 200
 
 class PublicacionesUsuario( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    decorators = [ 
+        limiter.limit( "1 per second", methods=[ 'GET' ] ),
+        limiter.limit( "50 per day", methods=[ 'POST' ] )
+    ]
+
     @marshal_with( publicacion_fields )
     def get ( self, clave_usuario_in ):
         try:
@@ -192,7 +200,6 @@ class PublicacionesUsuario( Resource ):
         except Error:
             return 404
 
-    decorators = [ limiter.limit( "50 per day" ) ]
     @auth_required
     @marshal_with( publicacion_fields )
     def post( self, clave_usuario_in ):
@@ -214,7 +221,11 @@ class PublicacionesUsuario( Resource ):
             return 404
 
 class PublicacionesExpecificas( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    decorators = [ 
+        limiter.limit( "1 per second", methods=[ 'GET' ] ),
+        limiter.limit( "50 per day", methods=[ 'DELETE' ] ) 
+    ]
+    
     @marshal_with( publicacion_fields )
     def get( self, clave_publicacion ):
         try:
@@ -224,8 +235,7 @@ class PublicacionesExpecificas( Resource ):
             return publicacionEncontrada, 200
         except Error:
             return 404
-    
-    decorators = [ limiter.limit( "50 per day" ) ]
+
     @auth_required
     def delete( self, clave_publicacion ):
         register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
