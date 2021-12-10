@@ -215,7 +215,7 @@ class PublicacionesUsuario( Resource ):
             publicacionArgs = publicacion_put_args.parse_args()
             if not publication_input_validation( publicacionArgs ):
                 abort( 400, message="Información inválida." )
-                
+
             publicacionExiste = Publicacion.query.filter_by( nombre_publicacion=publicacionArgs[ 'nombre_publicacion' ] ).one_or_none()
             if publicacionExiste:
                 abort( 409, message="Ya existe una publicación con ese nombre." ) 
@@ -270,6 +270,9 @@ class SearchPublicaciones( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self, search_query ):
+        if not search_input_validation( search_query ):
+            abort( 400, message="Información inválida." )
+
         publicaciones = Publicacion.query.filter( Publicacion.nombre_publicacion.contains( search_query ) ).all()
         if not publicaciones:
             abort( 404, message="No se encontraron publicaciones" )
@@ -286,6 +289,9 @@ class SearchUsuarios( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( usuario_fields )
     def get( self, search_query ):
+        if not search_input_validation( search_query ):
+            abort( 400, message="Información inválida." )
+
         usuarios = Usuario.query.filter( Usuario.nombre_usuario.contains( search_query ) ).all()
         if not usuarios:
             abort( 404, message="No se encontraron usuarios" )
