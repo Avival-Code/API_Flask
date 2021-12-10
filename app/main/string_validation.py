@@ -17,6 +17,6 @@ def user_input_validation( user_input ):
 
 def publication_input_validation( publication_input ):
     matches = True
-    matches = bool( re.fullmatch( r"/^[a-zA-ZÀ-ÿ\s]{3,40}$/", publication_input[ 'nombre_publicacion' ] ) )
-    matches = bool( re.fullmatch( r"/^[a-zA-ZÀ-ÿ\s\.]{3,200}$/", publication_input[ 'descripcion' ] ) )
+    matches = bool( re.fullmatch( r"(^[a-zA-ZÀ-ÿ\s]{3,40}$)", publication_input[ 'nombre_publicacion' ] ) )
+    matches = bool( re.fullmatch( r"(^[a-zA-ZÀ-ÿ\s\.]{3,200}$)", publication_input[ 'descripcion' ] ) )
     return matches

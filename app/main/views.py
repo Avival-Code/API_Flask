@@ -70,9 +70,9 @@ class UsuarioEspecifico( Resource ):
     @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
         args = usuario_put_args.parse_args()
-        if not user_input_validation( usuario_args ):
+        if not user_input_validation( args ):
             abort( 400, message="Información inválida." )
-            
+
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message = "No se encontró el usuario especificado." )
@@ -213,6 +213,9 @@ class PublicacionesUsuario( Resource ):
     def post( self, clave_usuario_in ):
         try: 
             publicacionArgs = publicacion_put_args.parse_args()
+            if not publication_input_validation( publicacionArgs ):
+                abort( 400, message="Información inválida." )
+                
             publicacionExiste = Publicacion.query.filter_by( nombre_publicacion=publicacionArgs[ 'nombre_publicacion' ] ).one_or_none()
             if publicacionExiste:
                 abort( 409, message="Ya existe una publicación con ese nombre." ) 
