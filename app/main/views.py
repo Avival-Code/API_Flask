@@ -20,6 +20,9 @@ from .string_validation import *
 class Login( Resource ):
     def post( self ):
         login_args = login_put_args.parse_args()
+        if not login_input_validation( login_args ):
+            abort( 400, message="Información inválida." )
+
         user = guard.authenticate( login_args[ 'username' ], login_args[ 'password' ] )
         token = guard.encode_jwt_token( user )
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
