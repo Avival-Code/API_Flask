@@ -15,6 +15,7 @@ from ..extensions import guard, limiter
 from ..models import *
 from .parsers import *
 from .fields import *
+from .string_validation import *
 
 class Login( Resource ):
     def post( self ):
@@ -38,6 +39,9 @@ class Usuarios( Resource ):
     @marshal_with( usuario_fields )
     def post( self ):
         usuario_args = usuario_put_args.parse_args()
+        if not user_input_validation( usuario_args ):
+            abort( 400, message="Información inválida." )
+
         usuario_existe = Usuario.query.filter_by( nombre_usuario=usuario_args[ 'nombre_usuario' ] ).one_or_none()
         if usuario_existe:
             abort( 409, message="El nombre de usuario ya se esta utilizando." )
@@ -66,6 +70,9 @@ class UsuarioEspecifico( Resource ):
     @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
         args = usuario_put_args.parse_args()
+        if not user_input_validation( usuario_args ):
+            abort( 400, message="Información inválida." )
+            
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message = "No se encontró el usuario especificado." )
