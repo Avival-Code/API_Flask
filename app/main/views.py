@@ -45,7 +45,7 @@ class Usuarios( Resource ):
         usuario = Usuario( nombres=usuario_args[ 'nombres' ], apellidos=usuario_args[ 'apellidos' ], correo_electronico=usuario_args[ 'correo_electronico' ], nombre_usuario=usuario_args[ 'nombre_usuario' ], contrasena=guard.hash_password( usuario_args[ 'contrasena' ] ), fecha_union=datetime.now(), foto_perfil='' )
         database.session.add( usuario )
         database.session.commit()
-        return usuario, 201
+        return 201
 
 class UsuarioEspecifico( Resource ):
     decorators = [ 
@@ -76,7 +76,7 @@ class UsuarioEspecifico( Resource ):
         usuario.contrasena = guard.hash_password( args[ "contrasena" ] )
         usuario.correo_electronico = args[ "correo_electronico" ]
         database.session.commit()
-        return usuario, 200
+        return 200
 
     @auth_required
     def delete( self, clave_usuario ):
@@ -178,6 +178,7 @@ class UsuariosFavoritos( Resource ):
 
         database.session.delete( usuario_favorito )
         database.session.commit()
+        return 200
 
 class PublicacionesGeneral( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
@@ -216,7 +217,7 @@ class PublicacionesUsuario( Resource ):
             multimedia = Multimedia( clave_publicacion=publicacionNueva.clave_publicacion ,multimedia=publicacionArgs[ 'multimedia' ] )
             database.session.add( multimedia )
             database.session.commit()
-            return publicacionNueva, 201
+            return 201
         except Error:
             return 404
 
@@ -312,6 +313,7 @@ class Comentarios(Resource):
 
             database.session.delete(comentarioEncontrado)
             database.session.commit()
+            return 200
 
 
 class multimedia( Resource ):
