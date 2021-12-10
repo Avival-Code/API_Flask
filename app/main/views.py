@@ -85,6 +85,7 @@ class UsuarioEspecifico( Resource ):
         usuario.nombre_usuario = args[ "nombre_usuario" ]
         usuario.contrasena = guard.hash_password( args[ "contrasena" ] )
         usuario.correo_electronico = args[ "correo_electronico" ]
+        usuario.foto_perfil = args[ "foto_perfil" ]
         database.session.commit()
         return 200
 
