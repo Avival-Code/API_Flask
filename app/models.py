@@ -35,7 +35,7 @@ class Usuario( database.Model ):
 
 class Publicacion( database.Model ):
     clave_publicacion = database.Column( database.Integer, primary_key=True, autoincrement=True )
-    nombre_publicacion = database.Column( database.String( 50 ), nullable=False )
+    nombre_publicacion = database.Column( database.String( 50 ), nullable=False, unique=True )
     descripcion = database.Column( database.String( 200 ), nullable=False )
     calificacion_general = database.Column( database.Float )
     categoria = database.Column( database.Integer, nullable=False )
