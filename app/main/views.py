@@ -206,6 +206,10 @@ class PublicacionesUsuario( Resource ):
     def post( self, clave_usuario_in ):
         try: 
             publicacionArgs = publicacion_put_args.parse_args()
+            publicacionExiste = Publicacion.query.filter_by( nombre_publicacion=publicacionArgs[ 'nombre_publicacion' ] ).one_or_none()
+            if publicacionExiste:
+                abort( 409, message="Ya existe una publicación con ese nombre." ) 
+            
             publicacionNueva = Publicacion( nombre_publicacion = publicacionArgs[ 'nombre_publicacion' ],descripcion=publicacionArgs[ 'descripcion' ],calificacion_general = 0.0, categoria = publicacionArgs[ 'categoria' ],fecha_publicacion= datetime.now() )
             database.session.add( publicacionNueva )
             database.session.commit()
