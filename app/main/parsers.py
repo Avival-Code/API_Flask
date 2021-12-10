@@ -11,6 +11,7 @@ usuario_put_args.add_argument( "apellidos", type=str, help="Los apellidos son re
 usuario_put_args.add_argument( "nombre_usuario", type=str, help="El nombre de usuario es requerido", required=True )
 usuario_put_args.add_argument( "contrasena", type=str, help="La contraseña es requerida", required=True )
 usuario_put_args.add_argument( "correo_electronico", type=str, help="El correo es requerido", required=True )
+usuario_put_args.add_argument( "foto_perfil", type=str, help="Foto de perfil de usuario", required=False )
 
 publicaciones_favoritas_put_args = reqparse.RequestParser()
 publicaciones_favoritas_put_args.add_argument( "clave_usuario", type=int, help="Se requiere la clave del usuario", required=True )
