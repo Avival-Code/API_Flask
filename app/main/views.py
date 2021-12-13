@@ -63,7 +63,7 @@ class UsuarioEspecifico( Resource ):
 
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -75,7 +75,7 @@ class UsuarioEspecifico( Resource ):
     @auth_required
     @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -101,7 +101,7 @@ class UsuarioEspecifico( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).first()
@@ -118,7 +118,7 @@ class PublicacionesFavoritas( Resource ):
     @auth_required
     @marshal_with( publicacion_fields )
     def get( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -132,7 +132,7 @@ class PublicacionesFavoritas( Resource ):
 
     @auth_required
     def post( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -151,7 +151,7 @@ class PublicacionesFavoritas( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -173,7 +173,7 @@ class UsuariosFavoritos( Resource ):
     @auth_required
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -187,7 +187,7 @@ class UsuariosFavoritos( Resource ):
 
     @auth_required
     def post( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -206,7 +206,7 @@ class UsuariosFavoritos( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -237,7 +237,7 @@ class PublicacionesUsuario( Resource ):
 
     @marshal_with( publicacion_fields )
     def get ( self, clave_usuario_in ):
-        if not user_key_validation( clave_usuario_in ):
+        if not id_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
@@ -253,7 +253,7 @@ class PublicacionesUsuario( Resource ):
     @auth_required
     @marshal_with( publicacion_fields )
     def post( self, clave_usuario_in ):
-        if not user_key_validation( clave_usuario_in ):
+        if not id_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
@@ -292,7 +292,7 @@ class PublicacionesExpecificas( Resource ):
     
     @marshal_with( publicacion_fields )
     def get( self, clave_publicacion ):
-        if not user_key_validation( clave_publicacion ):
+        if not id_validation( clave_publicacion ):
             abort( 400, message="Clave de publicación inválida." )
 
         try:
@@ -305,7 +305,7 @@ class PublicacionesExpecificas( Resource ):
 
     @auth_required
     def delete( self, clave_publicacion ):
-        if not user_key_validation( clave_publicacion ):
+        if not id_validation( clave_publicacion ):
             abort( 400, message="Clave de publicación inválida." )
 
         register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
@@ -420,7 +420,7 @@ class MultimediaUsuario( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self, clave_usuario ):
-        if not user_key_validation( clave_usuario ):
+        if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
         usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
@@ -445,7 +445,7 @@ class multimediaExpecifica(Resource):
     
     @marshal_with( multimedia_fields )
     def get (self, clave_publicacion_in):
-        if not user_key_validation( clave_publicacion_in ):
+        if not id_validation( clave_publicacion_in ):
             abort( 400, message="Clave de usuario inválida." )
 
         publicacion = Publicacion.query.filter_by( Publicacion.clave_publicacion==clave_publicacion_in ).one_or_none()
@@ -455,7 +455,7 @@ class multimediaExpecifica(Resource):
         multimedia = Multimedia.query.filter_by( Multimedia.clave_publicacion==clave_publicacion_in).one_or_none()
         if not multimedia:
             abort( 404, message="No hay multimedia para esta publicacion" )
-            
+
         return multimedia, 201 
       
 
