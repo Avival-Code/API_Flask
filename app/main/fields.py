@@ -1,7 +1,5 @@
 from flask_restful import fields
 
-from app.models import ComentarioUsuario
-
 usuario_fields = {
     'clave_usuario': fields.Integer,
     'nombres': fields.String,
@@ -28,7 +26,6 @@ comentario_usuario_fields = {
     'clave_publicacion': fields.Integer,
     'clave_usuario': fields.Integer,
     'comentario' : fields.String
-
 }
 
 calificacion_publicacion_fields = {

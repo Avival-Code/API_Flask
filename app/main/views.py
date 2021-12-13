@@ -1,21 +1,15 @@
-from copy import Error
-from datetime import datetime
-from logging import error
-from flask import make_response, render_template, jsonify, send_from_directory
-from flask.globals import session
-from flask.helpers import send_file, send_from_directory
-from werkzeug.exceptions import default_exceptions
-from werkzeug.utils import secure_filename
-from flask_restful import Resource, marshal, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
-from flask_praetorian import auth_required
-from flask_cors import cross_origin
-from werkzeug.wrappers import Response
 from .. import database
 from ..extensions import guard, limiter
 from ..models import *
 from .parsers import *
 from .fields import *
 from .string_validation import *
+from copy import Error
+from datetime import datetime
+from flask import jsonify
+from flask_restful import Resource, marshal_with, abort
+from flask_praetorian import auth_required
+from flask_cors import cross_origin
 
 class Login( Resource ):
     def post( self ):
@@ -276,7 +270,7 @@ class MultimediaUsuario( Resource ):
         
         return imagenes, 200
 
-class MultimediaExpecifica( Resource ):
+class MultimediaEspecifica( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self, clave_publicacion_in ):

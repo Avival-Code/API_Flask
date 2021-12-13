@@ -22,5 +22,5 @@ def publication_input_validation( publication_input ):
 def search_input_validation( busqueda ):
     return bool( re.fullmatch( r"(^[a-zA-Z0-9\_\-]{4,25}$)", busqueda ) )
 
-def id_validation( clave_usuario ):
-    return bool( re.fullmatch( r"(^[0-9]{1,3}$)", clave_usuario ) )
+def id_validation( id ):
+    return bool( re.fullmatch( r"(^[0-9]{1,3}$)", id ) )
