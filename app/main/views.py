@@ -30,7 +30,7 @@ class Login( Resource ):
 class Usuarios( Resource ):
     decorators = [ 
         limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "2 per day", methods=[ 'POST' ] )
+        limiter.limit( "200 per day", methods=[ 'POST' ] )
     ]
 
     @marshal_with( usuario_fields )
@@ -63,7 +63,10 @@ class UsuarioEspecifico( Resource ):
 
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -72,13 +75,20 @@ class UsuarioEspecifico( Resource ):
     @auth_required
     @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message = "No se encontró el usuario especificado." )
+
         args = usuario_put_args.parse_args()
         if not user_input_validation( args ):
             abort( 400, message="Información inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message = "No se encontró el usuario especificado." )
+        nombre_usuario_existente = Usuario.query.filter_by( nombre_usuario=args[ "nombre_usuario" ] ).one_or_none()
+        if nombre_usuario_existente:
+            abort( 409, message="El nombre de usuario ya se esta utilizando." )
 
         usuario.nombres = args[ "nombres" ]
         usuario.apellidos = args[ "apellidos" ]
@@ -91,7 +101,10 @@ class UsuarioEspecifico( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).first()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -105,7 +118,10 @@ class PublicacionesFavoritas( Resource ):
     @auth_required
     @marshal_with( publicacion_fields )
     def get( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
         
@@ -116,7 +132,10 @@ class PublicacionesFavoritas( Resource ):
 
     @auth_required
     def post( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -132,7 +151,10 @@ class PublicacionesFavoritas( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -151,7 +173,10 @@ class UsuariosFavoritos( Resource ):
     @auth_required
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -162,7 +187,10 @@ class UsuariosFavoritos( Resource ):
 
     @auth_required
     def post( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -178,7 +206,10 @@ class UsuariosFavoritos( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -206,6 +237,13 @@ class PublicacionesUsuario( Resource ):
 
     @marshal_with( publicacion_fields )
     def get ( self, clave_usuario_in ):
+        if not id_validation( clave_usuario_in ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
         try:
             publicaciones = database.session.query( Publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).filter( UsuarioPublicacion.clave_usuario==clave_usuario_in ).all()
             return publicaciones, 200
@@ -215,6 +253,13 @@ class PublicacionesUsuario( Resource ):
     @auth_required
     @marshal_with( publicacion_fields )
     def post( self, clave_usuario_in ):
+        if not id_validation( clave_usuario_in ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
         try: 
             publicacionArgs = publicacion_put_args.parse_args()
             if not publication_input_validation( publicacionArgs ):
@@ -247,6 +292,9 @@ class PublicacionesExpecificas( Resource ):
     
     @marshal_with( publicacion_fields )
     def get( self, clave_publicacion ):
+        if not id_validation( clave_publicacion ):
+            abort( 400, message="Clave de publicación inválida." )
+
         try:
             publicacionEncontrada = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).filter( Publicacion.clave_publicacion==clave_publicacion ).one_or_none()
             if not publicacionEncontrada:
@@ -257,6 +305,9 @@ class PublicacionesExpecificas( Resource ):
 
     @auth_required
     def delete( self, clave_publicacion ):
+        if not id_validation( clave_publicacion ):
+            abort( 400, message="Clave de publicación inválida." )
+
         register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
         if not register:
             abort (404, message= "No se encontro la publicacion especificada")
@@ -369,7 +420,14 @@ class MultimediaUsuario( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self, clave_usuario ):
-        registros = UsuarioPublicacion.query.filter_by( clave_usuario=clave_usuario ).all()
+        if not id_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        registros = UsuarioPublicacion.query.filter_by( UsuarioPublicacion.clave_usuario==clave_usuario ).all()
         if not registros:
             abort( 404, message="El usuario no tiene publicaciones." )
 
@@ -387,12 +445,18 @@ class multimediaExpecifica(Resource):
     
     @marshal_with( multimedia_fields )
     def get (self, clave_publicacion_in):
-       
+        if not id_validation( clave_publicacion_in ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        publicacion = Publicacion.query.filter_by( Publicacion.clave_publicacion==clave_publicacion_in ).one_or_none()
+        if not publicacion:
+            abort( 404, message="No se encontró la publicación especificada." )
             
-            multimedia = Multimedia.query.filter_by(clave_publicacion = clave_publicacion_in).one_or_none()
-            if not multimedia:
-                return "No hay multimedia para esta publicacion", 404
-            return multimedia, 201 
+        multimedia = Multimedia.query.filter_by( Multimedia.clave_publicacion==clave_publicacion_in).one_or_none()
+        if not multimedia:
+            abort( 404, message="No hay multimedia para esta publicacion" )
+
+        return multimedia, 201 
       
 
     def put (self, clave_publicacion_in):
