@@ -16,7 +16,8 @@ def user_input_validation( user_input ):
 def publication_input_validation( publication_input ):
     nombre = bool( re.fullmatch( r"(^[a-zA-ZÀ-ÿ\s]{3,40}$)", publication_input[ 'nombre_publicacion' ] ) )
     descripcion = bool( re.fullmatch( r"(^[a-zA-ZÀ-ÿ\s\.]{3,200}$)", publication_input[ 'descripcion' ] ) )
-    return ( nombre and descripcion )
+    categoria = bool( re.fullmatch( r"(^[0-9]{1,2}$)", publication_input[ 'categoria' ] ) )
+    return ( nombre and descripcion and categoria )
 
 def search_input_validation( busqueda ):
     return bool( re.fullmatch( r"(^[a-zA-Z0-9\_\-]{4,25}$)", busqueda ) )
