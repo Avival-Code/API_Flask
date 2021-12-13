@@ -99,7 +99,7 @@ class UsuarioEspecifico( Resource ):
     def delete( self, clave_usuario ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
-            
+
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -114,6 +114,9 @@ class PublicacionesFavoritas( Resource ):
     @auth_required
     @marshal_with( publicacion_fields )
     def get( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -125,6 +128,9 @@ class PublicacionesFavoritas( Resource ):
 
     @auth_required
     def post( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -141,6 +147,9 @@ class PublicacionesFavoritas( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -160,6 +169,9 @@ class UsuariosFavoritos( Resource ):
     @auth_required
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -171,6 +183,9 @@ class UsuariosFavoritos( Resource ):
 
     @auth_required
     def post( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -187,6 +202,9 @@ class UsuariosFavoritos( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+            
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
