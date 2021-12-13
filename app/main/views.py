@@ -445,12 +445,17 @@ class multimediaExpecifica(Resource):
     
     @marshal_with( multimedia_fields )
     def get (self, clave_publicacion_in):
-       
+        if not user_key_validation( clave_publicacion_in ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        publicacion = Publicacion.query.filter_by( Publicacion.clave_publicacion==clave_publicacion_in ).one_or_none()
+        if not publicacion:
+            abort( 404, message="No se encontró la publicación especificada." )
             
-            multimedia = Multimedia.query.filter_by(clave_publicacion = clave_publicacion_in).one_or_none()
-            if not multimedia:
-                return "No hay multimedia para esta publicacion", 404
-            return multimedia, 201 
+        multimedia = Multimedia.query.filter_by(clave_publicacion = clave_publicacion_in).one_or_none()
+        if not multimedia:
+            return "No hay multimedia para esta publicacion", 404
+        return multimedia, 201 
       
 
     def put (self, clave_publicacion_in):
