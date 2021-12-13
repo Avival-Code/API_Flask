@@ -452,9 +452,10 @@ class multimediaExpecifica(Resource):
         if not publicacion:
             abort( 404, message="No se encontró la publicación especificada." )
             
-        multimedia = Multimedia.query.filter_by(clave_publicacion = clave_publicacion_in).one_or_none()
+        multimedia = Multimedia.query.filter_by( Multimedia.clave_publicacion==clave_publicacion_in).one_or_none()
         if not multimedia:
-            return "No hay multimedia para esta publicacion", 404
+            abort( 404, message="No hay multimedia para esta publicacion" )
+            
         return multimedia, 201 
       
 
