@@ -200,7 +200,7 @@ class PublicacionesExpecificas( Resource ):
 
         register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
         if not register:
-            abort (404, message= "No se encontro la publicacion especificada")
+            abort( 404, message= "No se encontro la publicacion especificada" )
 
         multimedia = Multimedia.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()    
         publicacion = Publicacion.query.filter_by( clave_publicacion == clave_publicacion ).one_or_none()
@@ -246,50 +246,8 @@ class SearchUsuarios( Resource ):
             resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario } )
 
         return resultado, 200
-            
-class Comentarios(Resource):
-    @cross_origin( allow_headers=[ 'Content-Type' ] )
-    @marshal_with( comentario_usuario_fields )
-    def post(self):
-        try:
 
-            comentarioSubir = comentario_usuario_put_args.parse_args()
-            comentarioNuevo = ComentarioUsuario(clave_publicacion = comentarioSubir['clave_publicacion'],clave_usuario = comentarioSubir['clave_usuario'], comentario = comentarioSubir['comentario'])
-            database.session.add(comentarioNuevo)
-            database.session.commit()
-            return comentarioNuevo, 201
-        except Error:
-            return 404
-
-
-class ComentariosEspecificos(Resource):
-   
-    @marshal_with(comentario_usuario_fields )    
-    def get (self, clave_publicacion_in):
-        try:
-            
-            
-            comentarioPublicacion = ComentarioUsuario.query.filter_by(clave_publicacion=clave_publicacion_in).all()
-            if not comentarioPublicacion:
-                return "No hay comentarios", 404
-            return comentarioPublicacion, 201 
-        except Error:
-            return "Exepcion Encontrada",404
-
-    def delete(self):
-            clave_comentario = comentario_usuario_put_args.parse_args()
-            comentarioEncontrado = ComentarioUsuario.query.filter_by(clave_comentario == clave_comentario['clave_comentario']).one_or_none()
-            if not comentarioEncontrado:
-              abort (404, message= "No se encontro la publicacion especifica")
-
-            database.session.delete(comentarioEncontrado)
-            database.session.commit()
-            return 200
-
-
-class multimedia( Resource ):
-
-
+class Multimedia( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self ):
@@ -317,14 +275,11 @@ class MultimediaUsuario( Resource ):
             imagenes.append( { 'clave_multimedia': multimedia_especifica.clave_multimedia, 'clave_publicacion': multimedia_especifica.clave_publicacion, 'multimedia': multimedia_especifica.multimedia } )
         
         return imagenes, 200
-    
 
-    
-
-class multimediaExpecifica(Resource):
-    
+class MultimediaExpecifica( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
-    def get (self, clave_publicacion_in):
+    def get( self, clave_publicacion_in ):
         if not id_validation( clave_publicacion_in ):
             abort( 400, message="Clave de usuario inválida." )
 
@@ -337,3 +292,39 @@ class multimediaExpecifica(Resource):
             abort( 404, message="No hay multimedia para esta publicacion" )
 
         return multimedia, 201 
+
+class Comentarios( Resource ):
+    @cross_origin( allow_headers=[ 'Content-Type' ] )
+    @marshal_with( comentario_usuario_fields )
+    def post( self ):
+        try:
+            comentarioSubir = comentario_usuario_put_args.parse_args()
+            comentarioNuevo = ComentarioUsuario( clave_publicacion = comentarioSubir[ 'clave_publicacion' ], clave_usuario=comentarioSubir[ 'clave_usuario' ], comentario=comentarioSubir[ 'comentario' ] )
+            database.session.add( comentarioNuevo )
+            database.session.commit()
+            return comentarioNuevo, 201
+        except Error:
+            return 404
+
+class ComentariosEspecificos( Resource ):
+    @marshal_with( comentario_usuario_fields )    
+    def get( self, clave_publicacion_in ):
+        try:
+            comentarioPublicacion = ComentarioUsuario.query.filter_by( ComentarioUsuario.clave_publicacion==clave_publicacion_in ).all()
+            if not comentarioPublicacion:
+                abort( 404, message="No hay comentarios" )
+
+            return comentarioPublicacion, 201 
+        except Error:
+            return "Exepcion Encontrada",404
+
+    @auth_required
+    def delete( self ):
+            clave_comentario = comentario_usuario_put_args.parse_args()
+            comentarioEncontrado = ComentarioUsuario.query.filter_by( ComentarioUsuario.clave_comentario==clave_comentario[ 'clave_comentario' ] ).one_or_none()
+            if not comentarioEncontrado:
+              abort( 404, message="No se encontro el comentario especificado" )
+
+            database.session.delete( comentarioEncontrado )
+            database.session.commit()
+            return 200
