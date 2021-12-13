@@ -24,3 +24,9 @@ def search_input_validation( busqueda ):
 
 def id_validation( id ):
     return bool( re.fullmatch( r"(^[0-9]{1,3}$)", id ) )
+
+def comment_input_validation( comentario_input ):
+    clave_publicacion = id_validation( comentario_input[ 'clave_publicacion' ] )
+    clave_usuario = id_validation( comentario_input[ 'clave_usuario' ] )
+    comentario = bool( re.fullmatch( r"(^[a-zA-ZÀ-ÿ\s]{10,100}$)", comentario_input[ 'comentario' ] ) )
+    return ( clave_publicacion and clave_usuario and comentario )
