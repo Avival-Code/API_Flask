@@ -30,7 +30,7 @@ class Login( Resource ):
 class Usuarios( Resource ):
     decorators = [ 
         limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "2 per day", methods=[ 'POST' ] )
+        limiter.limit( "200 per day", methods=[ 'POST' ] )
     ]
 
     @marshal_with( usuario_fields )
