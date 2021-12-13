@@ -420,7 +420,14 @@ class MultimediaUsuario( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self, clave_usuario ):
-        registros = UsuarioPublicacion.query.filter_by( clave_usuario=clave_usuario ).all()
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
+        registros = UsuarioPublicacion.query.filter_by( UsuarioPublicacion.clave_usuario==clave_usuario ).all()
         if not registros:
             abort( 404, message="El usuario no tiene publicaciones." )
 
