@@ -323,7 +323,7 @@ class Comentarios(Resource):
 
 class ComentariosEspecificos(Resource):
    
-          
+    @marshal_with(comentario_usuario_fields )    
     def get (self, clave_publicacion_in):
         try:
             
