@@ -306,8 +306,9 @@ class SearchUsuarios( Resource ):
 
         return resultado, 200
             
-
 class Comentarios(Resource):
+    @cross_origin( allow_headers=[ 'Content-Type' ] )
+    @marshal_with( comentario_usuario_fields )
     def post(self):
         try:
 
@@ -318,11 +319,16 @@ class Comentarios(Resource):
             return comentarioNuevo, 201
         except Error:
             return 404
+
+
+class ComentariosEspecificos(Resource):
+   
           
-    def get (self, clave_publicacion):
+    def get (self, clave_publicacion_in):
         try:
             
-            comentarioPublicacion = ComentarioUsuario.query.filter_by(clave_publicacion == clave_publicacion).one_or_none()
+            
+            comentarioPublicacion = ComentarioUsuario.query.filter_by(clave_publicacion=clave_publicacion_in).one_or_none()
             if not comentarioPublicacion:
                 return "No hay comentarios", 404
             return comentarioPublicacion, 201 
