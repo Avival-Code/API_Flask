@@ -63,6 +63,9 @@ class UsuarioEspecifico( Resource ):
 
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -72,6 +75,9 @@ class UsuarioEspecifico( Resource ):
     @auth_required
     @marshal_with( usuario_fields )
     def put( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+
         args = usuario_put_args.parse_args()
         if not user_input_validation( args ):
             abort( 400, message="Información inválida." )
@@ -91,6 +97,9 @@ class UsuarioEspecifico( Resource ):
 
     @auth_required
     def delete( self, clave_usuario ):
+        if not user_key_validation( clave_usuario ):
+            abort( 400, message="Clave de usuario inválida." )
+            
         usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
