@@ -328,7 +328,7 @@ class ComentariosEspecificos(Resource):
         try:
             
             
-            comentarioPublicacion = ComentarioUsuario.query.filter_by(clave_publicacion=clave_publicacion_in).one_or_none()
+            comentarioPublicacion = ComentarioUsuario.query.filter_by(clave_publicacion=clave_publicacion_in).all()
             if not comentarioPublicacion:
                 return "No hay comentarios", 404
             return comentarioPublicacion, 201 
