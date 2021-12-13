@@ -66,7 +66,7 @@ class UsuarioEspecifico( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -78,7 +78,7 @@ class UsuarioEspecifico( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message = "No se encontró el usuario especificado." )
 
@@ -104,7 +104,7 @@ class UsuarioEspecifico( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).first()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -121,7 +121,7 @@ class PublicacionesFavoritas( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
         
@@ -135,7 +135,7 @@ class PublicacionesFavoritas( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -154,7 +154,7 @@ class PublicacionesFavoritas( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -176,7 +176,7 @@ class UsuariosFavoritos( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -190,7 +190,7 @@ class UsuariosFavoritos( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -209,7 +209,7 @@ class UsuariosFavoritos( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -240,6 +240,10 @@ class PublicacionesUsuario( Resource ):
         if not user_key_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
 
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
+
         try:
             publicaciones = database.session.query( Publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).filter( UsuarioPublicacion.clave_usuario==clave_usuario_in ).all()
             return publicaciones, 200
@@ -251,6 +255,10 @@ class PublicacionesUsuario( Resource ):
     def post( self, clave_usuario_in ):
         if not user_key_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
+
+        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        if not usuario:
+            abort( 404, message="No se encontró el usuario especificado." )
 
         try: 
             publicacionArgs = publicacion_put_args.parse_args()
