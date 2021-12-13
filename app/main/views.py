@@ -204,7 +204,7 @@ class UsuariosFavoritos( Resource ):
     def delete( self, clave_usuario ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
-            
+
         usuario = Usuario.query.filter_by( clave_usuario==clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
@@ -233,6 +233,9 @@ class PublicacionesUsuario( Resource ):
 
     @marshal_with( publicacion_fields )
     def get ( self, clave_usuario_in ):
+        if not user_key_validation( clave_usuario_in ):
+            abort( 400, message="Clave de usuario inválida." )
+
         try:
             publicaciones = database.session.query( Publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).filter( UsuarioPublicacion.clave_usuario==clave_usuario_in ).all()
             return publicaciones, 200
@@ -242,6 +245,9 @@ class PublicacionesUsuario( Resource ):
     @auth_required
     @marshal_with( publicacion_fields )
     def post( self, clave_usuario_in ):
+        if not user_key_validation( clave_usuario_in ):
+            abort( 400, message="Clave de usuario inválida." )
+
         try: 
             publicacionArgs = publicacion_put_args.parse_args()
             if not publication_input_validation( publicacionArgs ):
@@ -274,6 +280,9 @@ class PublicacionesExpecificas( Resource ):
     
     @marshal_with( publicacion_fields )
     def get( self, clave_publicacion ):
+        if not user_key_validation( clave_publicacion ):
+            abort( 400, message="Clave de publicación inválida." )
+
         try:
             publicacionEncontrada = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).filter( Publicacion.clave_publicacion==clave_publicacion ).one_or_none()
             if not publicacionEncontrada:
@@ -284,6 +293,9 @@ class PublicacionesExpecificas( Resource ):
 
     @auth_required
     def delete( self, clave_publicacion ):
+        if not user_key_validation( clave_publicacion ):
+            abort( 400, message="Clave de publicación inválida." )
+
         register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
         if not register:
             abort (404, message= "No se encontro la publicacion especificada")
