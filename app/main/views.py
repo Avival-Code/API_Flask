@@ -78,13 +78,17 @@ class UsuarioEspecifico( Resource ):
         if not user_key_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
+        if not usuario:
+            abort( 404, message = "No se encontró el usuario especificado." )
+
         args = usuario_put_args.parse_args()
         if not user_input_validation( args ):
             abort( 400, message="Información inválida." )
 
-        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message = "No se encontró el usuario especificado." )
+        nombre_usuario_existente = Usuario.query.filter_by( nombre_usuario=args[ "nombre_usuario" ] ).one_or_none()
+        if nombre_usuario_existente:
+            abort( 409, message="El nombre de usuario ya se esta utilizando." )
 
         usuario.nombres = args[ "nombres" ]
         usuario.apellidos = args[ "apellidos" ]
