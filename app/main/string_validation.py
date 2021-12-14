@@ -23,7 +23,7 @@ def search_input_validation( busqueda ):
     return bool( re.fullmatch( r"(^[a-zA-Z0-9\_\-]{4,25}$)", busqueda ) )
 
 def id_validation( id ):
-    return bool( re.fullmatch( r"(^[0-9]{1,3}$)", id ) )
+    return bool( re.fullmatch( r"(^[0-9]{1,3}$)", str( id ) ) )
 
 def comment_input_validation( comentario_input ):
     clave_publicacion = id_validation( comentario_input[ 'clave_publicacion' ] )

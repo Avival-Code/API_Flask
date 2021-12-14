@@ -12,6 +12,7 @@ from flask_praetorian import auth_required
 from flask_cors import cross_origin
 
 class Login( Resource ):
+    #decorators = [ limiter.limit( "1 per second" ) ]
     def post( self ):
         login_args = login_put_args.parse_args()
         if not login_input_validation( login_args ):
@@ -22,10 +23,10 @@ class Login( Resource ):
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
 
 class Usuarios( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "200 per day", methods=[ 'POST' ] )
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "200 per day", methods=[ 'POST' ] )
+    #]
 
     @marshal_with( usuario_fields )
     def get( self ):
@@ -49,11 +50,11 @@ class Usuarios( Resource ):
         return 201
 
 class UsuarioEspecifico( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "10 per day", methods=[ 'PUT' ] ),
-        limiter.limit( "1 per day", methods=[ 'DELETE' ] )
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "10 per day", methods=[ 'PUT' ] ),
+    #    limiter.limit( "1 per day", methods=[ 'DELETE' ] )
+    #]
 
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
@@ -107,17 +108,17 @@ class UsuarioEspecifico( Resource ):
         return {}, 200
 
 class PublicacionesGeneral( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self ):
         publicaciones = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).all()
         return publicaciones, 200
 
 class PublicacionesUsuario( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "50 per day", methods=[ 'POST' ] )
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "50 per day", methods=[ 'POST' ] )
+    #]
 
     @marshal_with( publicacion_fields )
     def get ( self, clave_usuario_in ):
@@ -169,10 +170,10 @@ class PublicacionesUsuario( Resource ):
             return 404
 
 class PublicacionesExpecificas( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "50 per day", methods=[ 'DELETE' ] ) 
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "50 per day", methods=[ 'DELETE' ] ) 
+    #]
     
     @marshal_with( publicacion_fields )
     def get( self, clave_publicacion ):
@@ -206,7 +207,7 @@ class PublicacionesExpecificas( Resource ):
         return 200
 
 class SearchPublicaciones( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self, search_query ):
         if not search_input_validation( search_query ):
@@ -225,7 +226,7 @@ class SearchPublicaciones( Resource ):
         return resultado, 200
 
 class SearchUsuarios( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( usuario_fields )
     def get( self, search_query ):
         if not search_input_validation( search_query ):
@@ -242,14 +243,14 @@ class SearchUsuarios( Resource ):
         return resultado, 200
 
 class Multimedia( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self ):
         multimedia = database.session.query( Multimedia ).all()
         return multimedia, 200
 
 class MultimediaUsuario( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self, clave_usuario ):
         if not id_validation( clave_usuario ):
@@ -271,7 +272,7 @@ class MultimediaUsuario( Resource ):
         return imagenes, 200
 
 class MultimediaEspecifica( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self, clave_publicacion_in ):
         if not id_validation( clave_publicacion_in ):
@@ -288,7 +289,7 @@ class MultimediaEspecifica( Resource ):
         return multimedia, 201 
 
 class Comentarios( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @auth_required
     @cross_origin( allow_headers=[ 'Content-Type' ] )
     @marshal_with( comentario_usuario_fields )
@@ -314,7 +315,7 @@ class Comentarios( Resource ):
             return 404
 
 class ComentariosEspecificos( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( comentario_usuario_fields )    
     def get( self, clave_publicacion_in ):
         try:
