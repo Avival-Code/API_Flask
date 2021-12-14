@@ -20,7 +20,7 @@ api.add_resource( PublicacionesUsuario, "/publicacionesusuario/<int:clave_usuari
 api.add_resource( PublicacionesExpecificas, "/publicaciones/<int:clave_publicacion>" )
 api.add_resource( SearchPublicaciones, "/publicaciones/search/<string:search_query>" )
 api.add_resource( SearchUsuarios, "/usuarios/search/<string:search_query>" )
-api.add_resource( Multimedia, "/multimedia" )
+api.add_resource( MultimediaGeneral, "/multimedia" )
 api.add_resource( MultimediaUsuario, "/multimedia/<int:clave_usuario>" )
 api.add_resource( MultimediaEspecifica, "/multimedia/<int:clave_publicacion_in>/obtenermultimedia" )
 api.add_resource( Comentarios, "/comentarios" )

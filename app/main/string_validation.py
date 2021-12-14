@@ -16,14 +16,14 @@ def user_input_validation( user_input ):
 def publication_input_validation( publication_input ):
     nombre = bool( re.fullmatch( r"(^[a-zA-ZÀ-ÿ\s]{3,40}$)", publication_input[ 'nombre_publicacion' ] ) )
     descripcion = bool( re.fullmatch( r"(^[a-zA-ZÀ-ÿ\s\.]{3,200}$)", publication_input[ 'descripcion' ] ) )
-    categoria = bool( re.fullmatch( r"(^[0-9]{1,2}$)", publication_input[ 'categoria' ] ) )
+    categoria = bool( re.fullmatch( r"(^[0-9]{1,2}$)", str( publication_input[ 'categoria' ] ) ) )
     return ( nombre and descripcion and categoria )
 
 def search_input_validation( busqueda ):
-    return bool( re.fullmatch( r"(^[a-zA-Z0-9\_\-]{4,25}$)", busqueda ) )
+    return bool( re.fullmatch( r"(^[a-zA-Z0-9\s\_\-]{4,25}$)", busqueda ) )
 
 def id_validation( id ):
-    return bool( re.fullmatch( r"(^[0-9]{1,3}$)", str( id ) ) )
+    return bool( re.fullmatch( r"(^[0-9]{1,4}$)", str( id ) ) )
 
 def comment_input_validation( comentario_input ):
     clave_publicacion = id_validation( comentario_input[ 'clave_publicacion' ] )

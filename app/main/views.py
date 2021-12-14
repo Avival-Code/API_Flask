@@ -25,7 +25,7 @@ class Login( Resource ):
 class Usuarios( Resource ):
     #decorators = [ 
     #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
-    #    limiter.limit( "200 per day", methods=[ 'POST' ] )
+    #    limiter.limit( "5 per day", methods=[ 'POST' ] )
     #]
 
     @marshal_with( usuario_fields )
@@ -61,7 +61,7 @@ class UsuarioEspecifico( Resource ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -73,7 +73,7 @@ class UsuarioEspecifico( Resource ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message = "No se encontró el usuario especificado." )
 
@@ -99,7 +99,7 @@ class UsuarioEspecifico( Resource ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).first()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -125,7 +125,7 @@ class PublicacionesUsuario( Resource ):
         if not id_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario_in ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -141,7 +141,7 @@ class PublicacionesUsuario( Resource ):
         if not id_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario_in ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -184,6 +184,7 @@ class PublicacionesExpecificas( Resource ):
             publicacionEncontrada = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).filter( Publicacion.clave_publicacion==clave_publicacion ).one_or_none()
             if not publicacionEncontrada:
                 abort( 404, message="No se encontró la publicación especificada" )
+
             return publicacionEncontrada, 200
         except Error:
             return 404
@@ -193,12 +194,12 @@ class PublicacionesExpecificas( Resource ):
         if not id_validation( clave_publicacion ):
             abort( 400, message="Clave de publicación inválida." )
 
-        register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
+        register = UsuarioPublicacion.query.filter_by( clave_publicacion=clave_publicacion ).one_or_none()
         if not register:
             abort( 404, message= "No se encontro la publicacion especificada" )
 
-        multimedia = Multimedia.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()    
-        publicacion = Publicacion.query.filter_by( clave_publicacion == clave_publicacion ).one_or_none()
+        multimedia = Multimedia.query.filter_by( clave_publicacion=clave_publicacion ).one_or_none()    
+        publicacion = Publicacion.query.filter_by( clave_publicacion=clave_publicacion ).one_or_none()
 
         database.session.delete( register )
         database.session.delete( multimedia )
@@ -242,11 +243,11 @@ class SearchUsuarios( Resource ):
 
         return resultado, 200
 
-class Multimedia( Resource ):
+class MultimediaGeneral( Resource ):
     #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self ):
-        multimedia = database.session.query( Multimedia ).all()
+        multimedia = Multimedia.query.all()
         return multimedia, 200
 
 class MultimediaUsuario( Resource ):
@@ -256,11 +257,11 @@ class MultimediaUsuario( Resource ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
-        registros = UsuarioPublicacion.query.filter_by( UsuarioPublicacion.clave_usuario==clave_usuario ).all()
+        registros = UsuarioPublicacion.query.filter_by( clave_usuario=clave_usuario ).all()
         if not registros:
             abort( 404, message="El usuario no tiene publicaciones." )
 
@@ -278,15 +279,15 @@ class MultimediaEspecifica( Resource ):
         if not id_validation( clave_publicacion_in ):
             abort( 400, message="Clave de usuario inválida." )
 
-        publicacion = Publicacion.query.filter_by( Publicacion.clave_publicacion==clave_publicacion_in ).one_or_none()
+        publicacion = Publicacion.query.filter_by( clave_publicacion=clave_publicacion_in ).one_or_none()
         if not publicacion:
             abort( 404, message="No se encontró la publicación especificada." )
             
-        multimedia = Multimedia.query.filter_by( Multimedia.clave_publicacion==clave_publicacion_in).one_or_none()
+        multimedia = Multimedia.query.filter_by( clave_publicacion=clave_publicacion_in ).one_or_none()
         if not multimedia:
             abort( 404, message="No hay multimedia para esta publicacion" )
 
-        return multimedia, 201 
+        return multimedia, 200 
 
 class Comentarios( Resource ):
     #decorators = [ limiter.limit( "1 per second" ) ]
@@ -299,11 +300,11 @@ class Comentarios( Resource ):
             if not comment_input_validation( comentarioSubir ):
                 abort( 400, message="Información inválida" )
 
-            publicacion = Publicacion.query.filter_by( Publicacion.clave_publicacion==comentarioSubir[ 'clave_publicacion' ] ).one_or_none()
+            publicacion = Publicacion.query.filter_by( clave_publicacion=comentarioSubir[ 'clave_publicacion' ] ).one_or_none()
             if not publicacion:
                 abort( 404, message="No se encontró la publicación especificada." )
 
-            usuario = Usuario.query.filter_by( Usuario.clave_usuario==comentarioSubir[ 'clave_usuario' ] ).one_or_none()
+            usuario = Usuario.query.filter_by( clave_usuario=comentarioSubir[ 'clave_usuario' ] ).one_or_none()
             if not usuario:
                 abort( 404, message="No se encontró el usuario especificado." )
 
@@ -322,14 +323,14 @@ class ComentariosEspecificos( Resource ):
             if not id_validation(  clave_publicacion_in ):
                 abort( 400, message="Clave de publicacion inválida" )
 
-            publicacion = Publicacion.query.filter_by( Publicacion.clave_publicacion==clave_publicacion_in ).one_or_none()
+            publicacion = Publicacion.query.filter_by( clave_publicacion=clave_publicacion_in ).one_or_none()
             if not publicacion:
                 abort( 404, message="No se encontró la publicación especificada." )
 
-            comentarioPublicacion = ComentarioUsuario.query.filter_by( ComentarioUsuario.clave_publicacion==clave_publicacion_in ).all()
+            comentarioPublicacion = ComentarioUsuario.query.filter_by( clave_publicacion=clave_publicacion_in ).all()
             if not comentarioPublicacion:
                 abort( 404, message="No hay comentarios" )
 
-            return comentarioPublicacion, 201 
+            return comentarioPublicacion, 200 
         except Error:
             return "Exepcion Encontrada",404
