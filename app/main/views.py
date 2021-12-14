@@ -1,23 +1,18 @@
-from copy import Error
-from datetime import datetime
-from logging import error
-from flask import make_response, render_template, jsonify, send_from_directory
-from flask.globals import session
-from flask.helpers import send_file, send_from_directory
-from werkzeug.exceptions import default_exceptions
-from werkzeug.utils import secure_filename
-from flask_restful import Resource, marshal, marshal_with, abort,Api, reqparse, request, MethodNotAllowed
-from flask_praetorian import auth_required
-from flask_cors import cross_origin
-from werkzeug.wrappers import Response
 from .. import database
 from ..extensions import guard, limiter
 from ..models import *
 from .parsers import *
 from .fields import *
 from .string_validation import *
+from copy import Error
+from datetime import datetime
+from flask import jsonify
+from flask_restful import Resource, marshal_with, abort
+from flask_praetorian import auth_required
+from flask_cors import cross_origin
 
 class Login( Resource ):
+    #decorators = [ limiter.limit( "1 per second" ) ]
     def post( self ):
         login_args = login_put_args.parse_args()
         if not login_input_validation( login_args ):
@@ -28,10 +23,10 @@ class Login( Resource ):
         return jsonify( { 'clave_usuario': user.clave_usuario, 'access_token': token } )
 
 class Usuarios( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "200 per day", methods=[ 'POST' ] )
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "5 per day", methods=[ 'POST' ] )
+    #]
 
     @marshal_with( usuario_fields )
     def get( self ):
@@ -55,18 +50,18 @@ class Usuarios( Resource ):
         return 201
 
 class UsuarioEspecifico( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "10 per day", methods=[ 'PUT' ] ),
-        limiter.limit( "1 per day", methods=[ 'DELETE' ] )
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "10 per day", methods=[ 'PUT' ] ),
+    #    limiter.limit( "1 per day", methods=[ 'DELETE' ] )
+    #]
 
     @marshal_with( usuario_fields )
     def get( self, clave_usuario ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -78,7 +73,7 @@ class UsuarioEspecifico( Resource ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message = "No se encontró el usuario especificado." )
 
@@ -104,7 +99,7 @@ class UsuarioEspecifico( Resource ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).first()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).first()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -112,135 +107,25 @@ class UsuarioEspecifico( Resource ):
         database.session.commit()
         return {}, 200
 
-class PublicacionesFavoritas( Resource ):
-    decorators = [ limiter.limit( "1 per second", methods=[ 'GET', 'POST', 'DELETE' ] ) ]
-
-    @auth_required
-    @marshal_with( publicacion_fields )
-    def get( self, clave_usuario ):
-        if not id_validation( clave_usuario ):
-            abort( 400, message="Clave de usuario inválida." )
-
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message="No se encontró el usuario especificado." )
-        
-        publicaciones_favoritas = database.session.query( Publicacion ).join( PublicacionesFavoritas, PublicacionesFavoritas.clave_publicacion==Publicacion.clave_publicacion ).filter( PublicacionesFavoritas.clave_usuario==clave_usuario ).all()
-        if not publicaciones_favoritas:
-            abort( 404, message="No hay publicaciones favoritas." )
-        return publicaciones_favoritas, 200
-
-    @auth_required
-    def post( self, clave_usuario ):
-        if not id_validation( clave_usuario ):
-            abort( 400, message="Clave de usuario inválida." )
-
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message="No se encontró el usuario especificado." )
-
-        args = publicaciones_favoritas_put_args.parse_args()
-        favorito_existe = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
-        if favorito_existe:
-            abort( 409, message="La publicación ya esta en la lista de favoritos." )
-
-        publicacion_favorita = PublicacionesFavoritas( clave_usuario=clave_usuario, clave_publicacion=args[ 'clave_publicacion' ] )
-        database.session.add( publicacion_favorita )
-        database.session.commit()
-        return {}, 201
-
-    @auth_required
-    def delete( self, clave_usuario ):
-        if not id_validation( clave_usuario ):
-            abort( 400, message="Clave de usuario inválida." )
-
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message="No se encontró el usuario especificado." )
-
-        args = publicaciones_favoritas_put_args.parse_args()
-        publicacion_favorita = PublicacionesFavoritas.query.filter_by( clave_usuario==clave_usuario).filter_by( PublicacionesFavoritas.clave_publicacion==args[ 'clave_publicacion' ] ).first()
-        if not publicacion_favorita:
-            abort( 409, message="No se encontró la publicación favorita especificada." )
-
-        database.session.delete( publicacion_favorita )
-        database.session.commit()
-        return {}, 200
-
-class UsuariosFavoritos( Resource ):
-    decorators = [ limiter.limit( "1 per second", methods=[ 'GET', 'POST', 'DELETE' ] ) ]
-
-    @auth_required
-    @marshal_with( usuario_fields )
-    def get( self, clave_usuario ):
-        if not id_validation( clave_usuario ):
-            abort( 400, message="Clave de usuario inválida." )
-
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message="No se encontró el usuario especificado." )
-
-        usuarios = database.session.query( Usuario ).join( UsuariosFavoritos, UsuariosFavoritos.clave_usuario_favorito==Usuario.clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario==clave_usuario ).all()
-        if not usuarios:
-            abort( 404, message="No hay usuarios favoritos." )
-        return usuarios, 200
-
-    @auth_required
-    def post( self, clave_usuario ):
-        if not id_validation( clave_usuario ):
-            abort( 400, message="Clave de usuario inválida." )
-
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message="No se encontró el usuario especificado." )
-
-        args = usuarios_favoritos_put_args.parse_args()
-        favorito_existe = UsuariosFavoritos.query.filter_by( clave_usuario==clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario_favorito==args[ "clave_usuario_favorito" ] ).first()
-        if favorito_existe:
-            abort( 404, message="El usuario ya esta en la lista de favoritos." )
-
-        favorito = UsuariosFavoritos( clave_usuario=clave_usuario, clave_usuario_favorito=args[ "clave_usuario_favorito" ] )
-        database.session.add( favorito )
-        database.session.commit()
-        return {}, 201
-
-    @auth_required
-    def delete( self, clave_usuario ):
-        if not id_validation( clave_usuario ):
-            abort( 400, message="Clave de usuario inválida." )
-
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
-        if not usuario:
-            abort( 404, message="No se encontró el usuario especificado." )
-
-        args = usuarios_favoritos_put_args.parse_args()
-        usuario_favorito = UsuariosFavoritos.query.filter_by( clave_usuario==clave_usuario ).filter_by( UsuariosFavoritos.clave_usuario_favorito==args[ "clave_usuario_favorito" ] ).first()
-        if not usuario_favorito:
-            abort( 404, message="No se encontró el usuario favorito especificado." )
-
-        database.session.delete( usuario_favorito )
-        database.session.commit()
-        return 200
-
 class PublicacionesGeneral( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self ):
         publicaciones = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).all()
         return publicaciones, 200
 
 class PublicacionesUsuario( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "50 per day", methods=[ 'POST' ] )
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "50 per day", methods=[ 'POST' ] )
+    #]
 
     @marshal_with( publicacion_fields )
     def get ( self, clave_usuario_in ):
         if not id_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario_in ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -256,7 +141,7 @@ class PublicacionesUsuario( Resource ):
         if not id_validation( clave_usuario_in ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario_in ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario_in ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
@@ -285,10 +170,10 @@ class PublicacionesUsuario( Resource ):
             return 404
 
 class PublicacionesExpecificas( Resource ):
-    decorators = [ 
-        limiter.limit( "1 per second", methods=[ 'GET' ] ),
-        limiter.limit( "50 per day", methods=[ 'DELETE' ] ) 
-    ]
+    #decorators = [ 
+    #    limiter.limit( "1 per second", methods=[ 'GET' ] ),
+    #    limiter.limit( "50 per day", methods=[ 'DELETE' ] ) 
+    #]
     
     @marshal_with( publicacion_fields )
     def get( self, clave_publicacion ):
@@ -299,6 +184,7 @@ class PublicacionesExpecificas( Resource ):
             publicacionEncontrada = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).join( UsuarioPublicacion, UsuarioPublicacion.clave_publicacion==Publicacion.clave_publicacion ).filter( Publicacion.clave_publicacion==clave_publicacion ).one_or_none()
             if not publicacionEncontrada:
                 abort( 404, message="No se encontró la publicación especificada" )
+
             return publicacionEncontrada, 200
         except Error:
             return 404
@@ -308,12 +194,12 @@ class PublicacionesExpecificas( Resource ):
         if not id_validation( clave_publicacion ):
             abort( 400, message="Clave de publicación inválida." )
 
-        register = UsuarioPublicacion.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()
+        register = UsuarioPublicacion.query.filter_by( clave_publicacion=clave_publicacion ).one_or_none()
         if not register:
-            abort (404, message= "No se encontro la publicacion especificada")
+            abort( 404, message= "No se encontro la publicacion especificada" )
 
-        multimedia = Multimedia.query.filter_by( clave_publicacion==clave_publicacion ).one_or_none()    
-        publicacion = Publicacion.query.filter_by( clave_publicacion == clave_publicacion ).one_or_none()
+        multimedia = Multimedia.query.filter_by( clave_publicacion=clave_publicacion ).one_or_none()    
+        publicacion = Publicacion.query.filter_by( clave_publicacion=clave_publicacion ).one_or_none()
 
         database.session.delete( register )
         database.session.delete( multimedia )
@@ -322,7 +208,7 @@ class PublicacionesExpecificas( Resource ):
         return 200
 
 class SearchPublicaciones( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self, search_query ):
         if not search_input_validation( search_query ):
@@ -341,7 +227,7 @@ class SearchPublicaciones( Resource ):
         return resultado, 200
 
 class SearchUsuarios( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( usuario_fields )
     def get( self, search_query ):
         if not search_input_validation( search_query ):
@@ -356,78 +242,26 @@ class SearchUsuarios( Resource ):
             resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario } )
 
         return resultado, 200
-            
-class Comentarios(Resource):
-    @cross_origin( allow_headers=[ 'Content-Type' ] )
-    @marshal_with( comentario_usuario_fields )
-    def post(self):
-        try:
 
-            comentarioSubir = comentario_usuario_put_args.parse_args()
-            comentarioNuevo = ComentarioUsuario(clave_publicacion = comentarioSubir['clave_publicacion'],clave_usuario = comentarioSubir['clave_usuario'], comentario = comentarioSubir['comentario'])
-            database.session.add(comentarioNuevo)
-            database.session.commit()
-            return comentarioNuevo, 201
-        except Error:
-            return 404
-
-
-class ComentariosEspecificos(Resource):
-   
-    @marshal_with(comentario_usuario_fields )    
-    def get (self, clave_publicacion_in):
-        try:
-            
-            
-            comentarioPublicacion = ComentarioUsuario.query.filter_by(clave_publicacion=clave_publicacion_in).all()
-            if not comentarioPublicacion:
-                return "No hay comentarios", 404
-            return comentarioPublicacion, 201 
-        except Error:
-            return "Exepcion Encontrada",404
-
-    def delete(self):
-            clave_comentario = comentario_usuario_put_args.parse_args()
-            comentarioEncontrado = ComentarioUsuario.query.filter_by(clave_comentario == clave_comentario['clave_comentario']).one_or_none()
-            if not comentarioEncontrado:
-              abort (404, message= "No se encontro la publicacion especifica")
-
-            database.session.delete(comentarioEncontrado)
-            database.session.commit()
-            return 200
-
-
-class multimedia( Resource ):
-
-    def post(self):
-        
-        try: 
-            multimediaSubir = multimedia_put_args.parse_args()
-            multimediaNueva = Multimedia(clave_publicacion=multimediaSubir['clave_publicacion'], multimedia= ['multimedia'])
-            database.session.add(multimediaNueva)
-            database.session.commit()
-            return multimediaNueva, 201
-        except Error:
-            return 404
-
-    decorators = [ limiter.limit( "1 per second" ) ]
+class MultimediaGeneral( Resource ):
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self ):
-        multimedia = database.session.query( Multimedia ).all()
+        multimedia = Multimedia.query.all()
         return multimedia, 200
 
 class MultimediaUsuario( Resource ):
-    decorators = [ limiter.limit( "1 per second" ) ]
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
     def get( self, clave_usuario ):
         if not id_validation( clave_usuario ):
             abort( 400, message="Clave de usuario inválida." )
 
-        usuario = Usuario.query.filter_by( Usuario.clave_usuario==clave_usuario ).one_or_none()
+        usuario = Usuario.query.filter_by( clave_usuario=clave_usuario ).one_or_none()
         if not usuario:
             abort( 404, message="No se encontró el usuario especificado." )
 
-        registros = UsuarioPublicacion.query.filter_by( UsuarioPublicacion.clave_usuario==clave_usuario ).all()
+        registros = UsuarioPublicacion.query.filter_by( clave_usuario=clave_usuario ).all()
         if not registros:
             abort( 404, message="El usuario no tiene publicaciones." )
 
@@ -437,50 +271,66 @@ class MultimediaUsuario( Resource ):
             imagenes.append( { 'clave_multimedia': multimedia_especifica.clave_multimedia, 'clave_publicacion': multimedia_especifica.clave_publicacion, 'multimedia': multimedia_especifica.multimedia } )
         
         return imagenes, 200
-    
 
-    
-
-class multimediaExpecifica(Resource):
-    
+class MultimediaEspecifica( Resource ):
+    #decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( multimedia_fields )
-    def get (self, clave_publicacion_in):
+    def get( self, clave_publicacion_in ):
         if not id_validation( clave_publicacion_in ):
             abort( 400, message="Clave de usuario inválida." )
 
-        publicacion = Publicacion.query.filter_by( Publicacion.clave_publicacion==clave_publicacion_in ).one_or_none()
+        publicacion = Publicacion.query.filter_by( clave_publicacion=clave_publicacion_in ).one_or_none()
         if not publicacion:
             abort( 404, message="No se encontró la publicación especificada." )
             
-        multimedia = Multimedia.query.filter_by( Multimedia.clave_publicacion==clave_publicacion_in).one_or_none()
+        multimedia = Multimedia.query.filter_by( clave_publicacion=clave_publicacion_in ).one_or_none()
         if not multimedia:
             abort( 404, message="No hay multimedia para esta publicacion" )
 
-        return multimedia, 201 
-      
+        return multimedia, 200 
 
-    def put (self, clave_publicacion_in):
+class Comentarios( Resource ):
+    #decorators = [ limiter.limit( "1 per second" ) ]
+    @auth_required
+    @cross_origin( allow_headers=[ 'Content-Type' ] )
+    @marshal_with( comentario_usuario_fields )
+    def post( self ):
         try:
-            multimediaNueva = multimedia_put_args.parse_args()
-            multimedia = Multimedia.query.filter_by(clave_publicacion = clave_publicacion_in).one_or_none().update(dict(multimedia = multimediaNueva["multimedia"]))
-            return 200
-        except Error:
-            return 400
-            
-class calificacionPublicacion(Resource):
-    def post(self):
-        try:
-            calificacionSubir = calificacion_publicacion_put_args.parse_args()
-            calificacionNueva = CalificacionPublicacion(clave_publicacion = calificacionSubir['clave_publicacion'], clave_usuario= calificacionSubir['clave_usuario'], calificacion=['calificacion'])
-            database.session.add(calificacionNueva)
+            comentarioSubir = comentario_usuario_put_args.parse_args()
+            if not comment_input_validation( comentarioSubir ):
+                abort( 400, message="Información inválida" )
+
+            publicacion = Publicacion.query.filter_by( clave_publicacion=comentarioSubir[ 'clave_publicacion' ] ).one_or_none()
+            if not publicacion:
+                abort( 404, message="No se encontró la publicación especificada." )
+
+            usuario = Usuario.query.filter_by( clave_usuario=comentarioSubir[ 'clave_usuario' ] ).one_or_none()
+            if not usuario:
+                abort( 404, message="No se encontró el usuario especificado." )
+
+            comentarioNuevo = ComentarioUsuario( clave_publicacion = comentarioSubir[ 'clave_publicacion' ], clave_usuario=comentarioSubir[ 'clave_usuario' ], comentario=comentarioSubir[ 'comentario' ] )
+            database.session.add( comentarioNuevo )
             database.session.commit()
-            return {}, 201
+            return comentarioNuevo, 201
         except Error:
             return 404
 
-class calificacionPublicacionEspecifica(Resource):
-    def get(self,clave_publicacion):
-        calificaciones = CalificacionPublicacion.query.filter_by(clave_publicacion = clave_publicacion)
-        if not calificaciones:
-            return "No existe calificaciones para la publicacion", 404
-        return calificaciones, 201
+class ComentariosEspecificos( Resource ):
+    #decorators = [ limiter.limit( "1 per second" ) ]
+    @marshal_with( comentario_usuario_fields )    
+    def get( self, clave_publicacion_in ):
+        try:
+            if not id_validation(  clave_publicacion_in ):
+                abort( 400, message="Clave de publicacion inválida" )
+
+            publicacion = Publicacion.query.filter_by( clave_publicacion=clave_publicacion_in ).one_or_none()
+            if not publicacion:
+                abort( 404, message="No se encontró la publicación especificada." )
+
+            comentarioPublicacion = ComentarioUsuario.query.filter_by( clave_publicacion=clave_publicacion_in ).all()
+            if not comentarioPublicacion:
+                abort( 404, message="No hay comentarios" )
+
+            return comentarioPublicacion, 200 
+        except Error:
+            return "Exepcion Encontrada",404
