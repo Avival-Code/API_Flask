@@ -288,6 +288,7 @@ class MultimediaEspecifica( Resource ):
         return multimedia, 201 
 
 class Comentarios( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @auth_required
     @cross_origin( allow_headers=[ 'Content-Type' ] )
     @marshal_with( comentario_usuario_fields )
@@ -313,6 +314,7 @@ class Comentarios( Resource ):
             return 404
 
 class ComentariosEspecificos( Resource ):
+    decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( comentario_usuario_fields )    
     def get( self, clave_publicacion_in ):
         try:
