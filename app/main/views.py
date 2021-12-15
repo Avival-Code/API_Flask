@@ -111,8 +111,14 @@ class PublicacionesGeneral( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self ):
-        publicaciones = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).all()
-        return publicaciones, 200
+        publicaciones = Publicacion.query.all()
+
+        resultados = []
+        for publicacion in publicaciones:
+            multimedia = Multimedia.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
+            resultados.append( { 'clave_publicacion': publicacion.clave_publicacion, 'clave_usuario': publicacion.clave_usuario, 'nombre_publicacion': publicacion.nombre_publicacion, 'descripcion': publicacion.descripcion, 'calificacion_general': publicacion.calificacion_general, 'categoria': publicacion.categoria, 'fecha_publicacion': publicacion.fecha_publicacion , 'multimedia': multimedia.multimedia } )
+        
+        return resultados, 200
 
 class PublicacionesUsuario( Resource ):
     decorators = [ 
