@@ -115,8 +115,9 @@ class PublicacionesGeneral( Resource ):
 
         resultados = []
         for publicacion in publicaciones:
+            usuario_publicacion = UsuarioPublicacion.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
             multimedia = Multimedia.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
-            resultados.append( { 'clave_publicacion': publicacion.clave_publicacion, 'clave_usuario': publicacion.clave_usuario, 'nombre_publicacion': publicacion.nombre_publicacion, 'descripcion': publicacion.descripcion, 'calificacion_general': publicacion.calificacion_general, 'categoria': publicacion.categoria, 'fecha_publicacion': publicacion.fecha_publicacion , 'multimedia': multimedia.multimedia } )
+            resultados.append( { 'clave_publicacion': publicacion.clave_publicacion, 'clave_usuario': usuario_publicacion.clave_usuario, 'nombre_publicacion': publicacion.nombre_publicacion, 'descripcion': publicacion.descripcion, 'calificacion_general': publicacion.calificacion_general, 'categoria': publicacion.categoria, 'fecha_publicacion': publicacion.fecha_publicacion , 'multimedia': multimedia.multimedia } )
         
         return resultados, 200
 
