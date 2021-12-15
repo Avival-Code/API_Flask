@@ -25,6 +25,7 @@ comentario_usuario_fields = {
     'clave_comentario': fields.Integer,
     'clave_publicacion': fields.Integer,
     'clave_usuario': fields.Integer,
+    'nombre_usuario': fields.String,
     'comentario' : fields.String
 }
 

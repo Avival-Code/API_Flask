@@ -111,8 +111,15 @@ class PublicacionesGeneral( Resource ):
     decorators = [ limiter.limit( "1 per second" ) ]
     @marshal_with( publicacion_fields )
     def get( self ):
-        publicaciones = database.session.query( Publicacion ).join( Multimedia, Multimedia.clave_publicacion==Publicacion.clave_publicacion ).all()
-        return publicaciones, 200
+        publicaciones = Publicacion.query.all()
+
+        resultados = []
+        for publicacion in publicaciones:
+            usuario_publicacion = UsuarioPublicacion.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
+            multimedia = Multimedia.query.filter_by( clave_publicacion=publicacion.clave_publicacion ).one_or_none()
+            resultados.append( { 'clave_publicacion': publicacion.clave_publicacion, 'clave_usuario': usuario_publicacion.clave_usuario, 'nombre_publicacion': publicacion.nombre_publicacion, 'descripcion': publicacion.descripcion, 'calificacion_general': publicacion.calificacion_general, 'categoria': publicacion.categoria, 'fecha_publicacion': publicacion.fecha_publicacion , 'multimedia': multimedia.multimedia } )
+        
+        return resultados, 200
 
 class PublicacionesUsuario( Resource ):
     decorators = [ 
@@ -169,7 +176,7 @@ class PublicacionesUsuario( Resource ):
         except Error:
             return 404
 
-class PublicacionesExpecificas( Resource ):
+class PublicacionesEspecificas( Resource ):
     decorators = [ 
         limiter.limit( "1 per second", methods=[ 'GET' ] ),
         limiter.limit( "50 per day", methods=[ 'DELETE' ] ) 
@@ -185,7 +192,11 @@ class PublicacionesExpecificas( Resource ):
             if not publicacionEncontrada:
                 abort( 404, message="No se encontró la publicación especificada" )
 
-            return publicacionEncontrada, 200
+            usuario_publicacion = UsuarioPublicacion.query.filter_by( clave_publicacion=publicacionEncontrada.clave_publicacion ).one_or_none()
+            multimedia = Multimedia.query.filter_by( clave_publicacion=publicacionEncontrada.clave_publicacion ).one_or_none()
+            resultado = { 'clave_publicacion': publicacionEncontrada.clave_publicacion, 'clave_usuario': usuario_publicacion.clave_usuario, 'nombre_publicacion': publicacionEncontrada.nombre_publicacion, 'descripcion': publicacionEncontrada.descripcion, 'calificacion_general': publicacionEncontrada.calificacion_general, 'categoria': publicacionEncontrada.categoria, 'fecha_publicacion': publicacionEncontrada.fecha_publicacion , 'multimedia': multimedia.multimedia }
+
+            return resultado, 200
         except Error:
             return 404
 
@@ -239,7 +250,7 @@ class SearchUsuarios( Resource ):
 
         resultado = []
         for usuario in usuarios:
-            resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario } )
+            resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario, 'foto_perfil': usuario.foto_perfil } )
 
         return resultado, 200
 
@@ -327,10 +338,13 @@ class ComentariosEspecificos( Resource ):
             if not publicacion:
                 abort( 404, message="No se encontró la publicación especificada." )
 
-            comentarioPublicacion = ComentarioUsuario.query.filter_by( clave_publicacion=clave_publicacion_in ).all()
-            if not comentarioPublicacion:
-                abort( 404, message="No hay comentarios" )
+            comentariosPublicacion = ComentarioUsuario.query.filter_by( clave_publicacion=clave_publicacion_in ).all()
+            
+            resultados = []
+            for comentario in comentariosPublicacion:
+                usuario = Usuario.query.filter_by( clave_usuario=comentario.clave_usuario ).one_or_none()
+                resultados.append( { 'clave_comentario': comentario.clave_comentario, 'clave_publicacion': comentario.clave_publicacion , 'clave_usuario': comentario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario, 'comentario': comentario.comentario } )
 
-            return comentarioPublicacion, 200 
+            return resultados, 200 
         except Error:
             return "Exepcion Encontrada",404
