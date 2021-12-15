@@ -250,7 +250,7 @@ class SearchUsuarios( Resource ):
 
         resultado = []
         for usuario in usuarios:
-            resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario } )
+            resultado.append( { 'clave_usuario': usuario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario, 'foto_perfil': usuario.foto_perfil } )
 
         return resultado, 200
 
