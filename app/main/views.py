@@ -327,10 +327,13 @@ class ComentariosEspecificos( Resource ):
             if not publicacion:
                 abort( 404, message="No se encontró la publicación especificada." )
 
-            comentarioPublicacion = ComentarioUsuario.query.filter_by( clave_publicacion=clave_publicacion_in ).all()
-            if not comentarioPublicacion:
-                abort( 404, message="No hay comentarios" )
+            comentariosPublicacion = ComentarioUsuario.query.filter_by( clave_publicacion=clave_publicacion_in ).all()
+            
+            resultados = []
+            for comentario in comentariosPublicacion:
+                usuario = Usuario.query.filter_by( clave_usuario=comentario.clave_usuario ).one_or_none()
+                resultados.append( { 'clave_comentario': comentario.clave_comentario, 'clave_publicacion': comentario.clave_publicacion , 'clave_usuario': comentario.clave_usuario, 'nombre_usuario': usuario.nombre_usuario, 'comentario': comentario.comentario } )
 
-            return comentarioPublicacion, 200 
+            return resultados, 200 
         except Error:
             return "Exepcion Encontrada",404
