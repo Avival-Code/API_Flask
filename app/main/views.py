@@ -194,7 +194,7 @@ class PublicacionesEspecificas( Resource ):
 
             usuario_publicacion = UsuarioPublicacion.query.filter_by( clave_publicacion=publicacionEncontrada.clave_publicacion ).one_or_none()
             multimedia = Multimedia.query.filter_by( clave_publicacion=publicacionEncontrada.clave_publicacion ).one_or_none()
-            resultado = [ 'clave_publicacion': publicacionEncontrada.clave_publicacion, 'clave_usuario': usuario_publicacion.clave_usuario, 'nombre_publicacion': publicacionEncontrada.nombre_publicacion, 'descripcion': publicacionEncontrada.descripcion, 'calificacion_general': publicacionEncontrada.calificacion_general, 'categoria': publicacionEncontrada.categoria, 'fecha_publicacion': publicacionEncontrada.fecha_publicacion , 'multimedia': multimedia.multimedia ]
+            resultado = { 'clave_publicacion': publicacionEncontrada.clave_publicacion, 'clave_usuario': usuario_publicacion.clave_usuario, 'nombre_publicacion': publicacionEncontrada.nombre_publicacion, 'descripcion': publicacionEncontrada.descripcion, 'calificacion_general': publicacionEncontrada.calificacion_general, 'categoria': publicacionEncontrada.categoria, 'fecha_publicacion': publicacionEncontrada.fecha_publicacion , 'multimedia': multimedia.multimedia }
 
             return resultado, 200
         except Error:
